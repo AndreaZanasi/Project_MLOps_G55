@@ -22,7 +22,7 @@ The Watkins Marine Mammal Sound Database (WMMS) is a comprehensive collection of
 
 ## Expected Models
 
-The expected model we're going to use is the ResNet38, a variant of the ResNet family which consists of deep convolutional neural networks originally developed for image recognition tasks. It has 38 layers balancing complexity and computational efficiency. In the context of audio classification, we can transform raw audio recordings into image representations, such as spectrograms, which encode the frequency and temporal information of the sounds. By feeding these spectrograms into ResNet38, the model can automatically learn patterns and features corresponding to different animal vocalizations.
+The expected model we're going to use is the ResNet34, a variant of the ResNet family which consists of deep convolutional neural networks originally developed for image recognition tasks. It has 34 layers balancing complexity and computational efficiency. In the context of audio classification, we can transform raw audio recordings into image representations, such as spectrograms, which encode the frequency and temporal information of the sounds. By feeding these spectrograms into ResNet34, the model can automatically learn patterns and features corresponding to different animal vocalizations.
 
 ## Project structure
 

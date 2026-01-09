@@ -1,11 +1,17 @@
 from torch import nn
 import torch
+import torchvision.models as models
+
+"""
+Saved 1357 train (shape: torch.Size([1357, 1, 64, 1168]))
+Saved 340 test (shape: torch.Size([340, 1, 64, 1168]))
+"""
 
 class Model(nn.Module):
-    """Just a dummy model to show how to structure your code"""
+    """Already trained ResNet34 to exctract features from audio files"""
     def __init__(self):
         super().__init__()
-        self.layer = nn.Linear(1, 1)
+        self.resnet = models.resnet34
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.layer(x)
