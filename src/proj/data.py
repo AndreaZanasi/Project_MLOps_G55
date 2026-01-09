@@ -4,7 +4,6 @@ import typer
 import librosa
 import torch
 import numpy as np
-import soundfile as sf
 from torch.utils.data import Dataset
 from datasets import load_dataset
 
