@@ -2,6 +2,7 @@ from pathlib import Path
 
 import typer
 from torch.utils.data import Dataset
+from datasets import load_dataset
 
 
 class MyDataset(Dataset):
@@ -18,6 +19,12 @@ class MyDataset(Dataset):
 
     def preprocess(self, output_folder: Path) -> None:
         """Preprocess the raw data and save it to the output folder."""
+
+    def download_data(self):
+        ds = load_dataset("cgeorgiaw/animal-sounds")
+        for split in ds:
+            for sample in ds[split]:
+                path = sample["audio"]["path"]
 
 def preprocess(data_path: Path, output_folder: Path) -> None:
     print("Preprocessing data...")
