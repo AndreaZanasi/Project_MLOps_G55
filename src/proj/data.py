@@ -4,7 +4,7 @@ import typer
 import librosa
 import torch
 import numpy as np
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, TensorDataset
 from datasets import load_dataset
 
 
@@ -13,6 +13,8 @@ class MyDataset(Dataset):
 
     def __init__(self, data_path: Path) -> None:
         self.data_path = data_path
+        self.train_set = None
+        self.test_set = None
 
     def __len__(self) -> int:
         """Return the length of the dataset."""
@@ -28,8 +30,8 @@ class MyDataset(Dataset):
         test_folder.mkdir(parents=True, exist_ok=True)
 
         train_ds, test_ds = self.make_dataset()
-        self.spec_to_tensors(train_ds, train_folder, "train")
-        self.spec_to_tensors(test_ds, test_folder, "test")
+        self.train_set = self.spec_to_tensors(train_ds, train_folder, "train")
+        self.test_set = self.spec_to_tensors(test_ds, test_folder, "test")
 
     def spec_to_tensors(self, dataset, save_folder: Path, split: str) -> None:
         target_sr = 32000
@@ -80,6 +82,9 @@ class MyDataset(Dataset):
 
         torch.save({"spectrograms": spectrograms, "labels": labels}, f"{save_folder}/{split}.pt")
         print(f"Saved {len(dataset)} spectrograms to {save_folder} (shape: {spectrograms.shape})")
+
+        tensor_dataset = TensorDataset(spectrograms, labels)
+        return tensor_dataset
 
 
     def make_dataset(self) -> None:
