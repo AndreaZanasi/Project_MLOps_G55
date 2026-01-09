@@ -1,7 +1,5 @@
 from torch import nn
 import torch
-import hydra
-from hydra import compose, initialize
 import torchvision.models as models
 
 """
