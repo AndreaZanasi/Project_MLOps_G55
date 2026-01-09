@@ -36,6 +36,8 @@ class MyDataset(Dataset):
         n_mels = 64
         n_fft = 1024
         hop_length = 320
+
+        #This value was computed based on the average length of the audio files
         target_length = 1168
 
         spectrograms = []
@@ -61,7 +63,7 @@ class MyDataset(Dataset):
 
             mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-            #Pad data since every file should be of the same length
+            #Pad/Truncate data since every file must be of the same length
             if mel_spec_db.shape[1] < target_length:
                 pad_width = target_length - mel_spec_db.shape[1]
                 mel_spec_db = np.pad(mel_spec_db, ((0, 0), (0, pad_width)), mode='constant', constant_values=-80.0)
