@@ -1,5 +1,7 @@
 from torch import nn
 import torch
+import hydra
+from hydra import compose, initialize
 import torchvision.models as models
 
 """
@@ -11,24 +13,33 @@ There are 32 species
 
 class Model(nn.Module):
     """Already trained ResNet34 to exctract features from audio files"""
-    def __init__(self, num_classes: int = 32, pretrained: bool = False) -> None:
+    def __init__(self, cfg) -> None:
         super().__init__()
-        weights = "ResNet34_Weights.DEFAULT" if pretrained else None
+
+        features = cfg.parameters.features
+        kernel_sizes = cfg.parameters.kernel_sizes
+        strides = cfg.parameters.strides
+        paddings = cfg.parameters.paddings
+
+        weights = "ResNet34_Weights.DEFAULT" if cfg.setup.pretrained else None
         self.resnet = models.resnet34(weights=weights)
 
         self.resnet.conv1 = nn.Conv2d(
-            1, 64, kernel_size=7, stride=2, padding=3, bias=False
+            features[0], 
+            features[1], 
+            kernel_size=kernel_sizes[0], 
+            stride=strides[0], 
+            padding=paddings[0]
         )
 
-        num_features = self.resnet.fc.in_features
-        self.resnet.fc = nn.Linear(num_features, num_classes)
+        self.resnet.fc = nn.Linear(self.resnet.fc.in_features, cfg.setup.num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.resnet(x)
 
 if __name__ == "__main__":
 
-    model = Model(num_classes=32, pretrained=False)
+    model = Model()
     x = torch.rand(4, 1, 64, 1168)
     
     output = model(x)

@@ -1,0 +1,9 @@
+setup:
+  num_classes: 32
+  pretrained: false
+
+parameters:
+  features: [1, 64]
+  kernel_sizes: [7]
+  strides: [2]
+  paddings: [3]

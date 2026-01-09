@@ -1,6 +1,8 @@
 from proj.model import Model
 from proj.data import MyDataset
 import torch
+import hydra
+from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib as plt
@@ -13,20 +15,24 @@ DEVICE = torch.device(
         else "cpu"
     )
 
-def train():
-    model = Model(num_classes=32, pretrained=False)
-    model.to(DEVICE)
-
-    dataset = MyDataset("data/raw")
-    dataset.preprocess(Path("data/processed"))
-    train_dataloader = torch.utils.data.DataLoader(dataset.train_set, 64)
+def train(
+        model,
+        optimizer, 
+        criterion,
+        batch_size: int = 32,
+        epochs: int = 10,
+        data_dir: str = "data/raw",
+        output_dir: str = "data/processed",
+        figures_dir: str = "reports/figures",
+        model_name: str = "models/model.pt"
+):
+    dataset = MyDataset(data_dir)
+    dataset.preprocess(Path(output_dir))
+    train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size)
     
     statistics = {"loss": [], "accuracy": []}
 
-    optimizer = torch.optim.Adam(lr=1e-3, weight_decay=0, eps=1e-8, betas=[0.9, 0.999], params=model.parameters())
-    criterion = torch.nn.CrossEntropyLoss()
-
-    for e in tqdm(range(10), desc="Training"):
+    for e in tqdm(range(epochs), desc="Training"):
         model.train()
         for audio, label in train_dataloader:
             audio, label = audio.to(DEVICE), label.to(DEVICE)
@@ -44,8 +50,8 @@ def train():
         statistics["accuracy"].append(accuracy.item())
         print(f"\nEpoch: {e} | Loss: {loss.item()} | Accuracy: {accuracy.item()}")
 
-        torch.save(model.state_dict(), "models/model.pth")
-        #eval("models/model.pth", 64, dataset, model)
+        torch.save(model.state_dict(), model_name)
+        #eval(model_name, batch_size, dataset, model)
 
     print("Training complete")
 
@@ -54,8 +60,27 @@ def train():
     axs[0].set_title("Train loss")
     axs[1].plot(statistics["accuracy"])
     axs[1].set_title("Train accuracy")
-    fig.savefig(f"reports/figures/training_statistics.png")
+    fig.savefig(f"{figures_dir}/training_statistics.png")
 
+def main():
+    with initialize(config_path="../../configs", version_base="1.1"):
+        train_cfg = compose(config_name="train_cfg.yaml")
+        model_cfg = compose(config_name="model_cfg.yaml")
+
+    model = Model(model_cfg)
+    model.to(DEVICE)
+
+    train(
+        model,
+        hydra.utils.instantiate(train_cfg.optimizer, params=model.parameters()),
+        hydra.utils.instantiate(train_cfg.criterion),
+        train_cfg.hyperparameters.batch_size,
+        train_cfg.hyperparameters.epochs,
+        train_cfg.paths.data_dir,
+        train_cfg.paths.output_dir,
+        train_cfg.paths.figures_dir,
+        train_cfg.paths.model_name
+    )
 
 if __name__ == "__main__":
-    train()
+    main()
