@@ -3,7 +3,8 @@
 ## Overall goal
 The objective of this project is to classify animal vocalizations. By utilizing audio recordings of various species, such as birds, dogs, bats, and orcas, we aim to transform raw audio into spectrograms and treat the task as an image classification problem.
 
-## Frameworks
+## Framework
+**PyTorch & Torchaudio:** We will be using torchaudio as our functional framework to transform raw animal sounds into Mel-spectrograms
 
 ## Data
 
