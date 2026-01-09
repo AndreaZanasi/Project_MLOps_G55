@@ -2,6 +2,7 @@ from proj.model import Model
 from proj.data import MyDataset
 import torch
 import hydra
+from omegaconf import OmegaConf
 from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
@@ -66,6 +67,11 @@ def main():
     with initialize(config_path="../../configs", version_base="1.1"):
         train_cfg = compose(config_name="train_cfg.yaml")
         model_cfg = compose(config_name="model_cfg.yaml")
+
+    print("Training Configuration:")
+    print(OmegaConf.to_yaml(train_cfg))
+    print("\nModel Configuration:")
+    print(OmegaConf.to_yaml(model_cfg))
 
     model = Model(model_cfg)
     model.to(DEVICE)

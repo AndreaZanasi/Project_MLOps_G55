@@ -26,6 +26,19 @@ class MyDataset(Dataset):
         """Preprocess the raw data and save it to the output folder."""
         train_folder = output_folder / "train"
         test_folder = output_folder / "test"
+
+        train_file = train_folder / "train.pt"
+        test_file = test_folder / "test.pt"
+
+        if train_file.exists() and test_file.exists():
+            print(f"Preprocessed data already exists in {output_folder}, loading from disk...")
+            train_data = torch.load(train_file, weights_only=True)
+            test_data = torch.load(test_file, weights_only=True)
+            self.train_set = TensorDataset(train_data["spectrograms"], train_data["labels"])
+            self.test_set = TensorDataset(test_data["spectrograms"], test_data["labels"])
+            print(f"Loaded {len(self.train_set)} train samples and {len(self.test_set)} test samples")
+            return
+
         train_folder.mkdir(parents=True, exist_ok=True)
         test_folder.mkdir(parents=True, exist_ok=True)
 
