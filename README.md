@@ -18,7 +18,7 @@ The objective of this project is to classify animal vocalizations. By utilizing 
 
 ## Data
 
-The Animal Sounds Collection (cgeorgiaw/animal‑sounds) is a multi-species dataset designed for species classification. It contains annotated recordings of vocalizations from 7 different animals (birds, dogs, egyptian fruit baits, giant otters, macaques, orcas and zebra finches). The dataset is organized modularly with separate splits per species, each recording is labeled with the corresponding species,moreover the recordings vary in length and acoustic characteristics.
+The Watkins Marine Mammal Sound Database (WMMS) is a comprehensive collection of marine mammal vocalizations curated by the Woods Hole Oceanographic Institution. This dataset contains over 1,600 cuts (audio segments) spanning 32,000 hours of recordings from 60+ marine species including whales, dolphins, seals, and other marine mammals. Each audio sample is labeled with species information and represents diverse acoustic characteristics of marine mammal communication. The dataset has been converted to Parquet format for efficient processing and is split into training and test sets.
 
 ## Expected Models
 
