@@ -1,12 +1,15 @@
 from proj.model import Model
 from proj.data import MyDataset
 import torch
+import logging
 import hydra
 from omegaconf import OmegaConf
 from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib as plt
+
+log = logging.getLogger(__name__)
 
 DEVICE = torch.device(
         "cuda"
@@ -49,12 +52,11 @@ def train(
 
         statistics["loss"].append(loss.item())
         statistics["accuracy"].append(accuracy.item())
-        print(f"\nEpoch: {e} | Loss: {loss.item()} | Accuracy: {accuracy.item()}")
+        log.info(f"\nEpoch: {e} | Loss: {loss.item()} | Accuracy: {accuracy.item()}")
 
         torch.save(model.state_dict(), model_name)
-        #eval(model_name, batch_size, dataset, model)
 
-    print("Training complete")
+    log.info("Training complete")
 
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
     axs[0].plot(statistics["loss"])
@@ -68,10 +70,10 @@ def main():
         train_cfg = compose(config_name="train_cfg.yaml")
         model_cfg = compose(config_name="model_cfg.yaml")
 
-    print("Training Configuration:")
-    print(OmegaConf.to_yaml(train_cfg))
-    print("\nModel Configuration:")
-    print(OmegaConf.to_yaml(model_cfg))
+    log.info("Training Configuration:")
+    log.info(OmegaConf.to_yaml(train_cfg))
+    log.info("\nModel Configuration:")
+    log.info(OmegaConf.to_yaml(model_cfg))
 
     model = Model(model_cfg)
     model.to(DEVICE)

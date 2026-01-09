@@ -2,11 +2,13 @@ from pathlib import Path
 
 import typer
 import librosa
+import logging
 import torch
 import numpy as np
 from torch.utils.data import Dataset, TensorDataset
 from datasets import load_dataset
 
+log = logging.getLogger(__name__)
 
 class MyDataset(Dataset):
     """My custom dataset."""
@@ -31,12 +33,12 @@ class MyDataset(Dataset):
         test_file = test_folder / "test.pt"
 
         if train_file.exists() and test_file.exists():
-            print(f"Preprocessed data already exists in {output_folder}, loading from disk...")
+            log.info(f"Preprocessed data already exists in {output_folder}, loading from disk...")
             train_data = torch.load(train_file, weights_only=True)
             test_data = torch.load(test_file, weights_only=True)
             self.train_set = TensorDataset(train_data["spectrograms"], train_data["labels"])
             self.test_set = TensorDataset(test_data["spectrograms"], test_data["labels"])
-            print(f"Loaded {len(self.train_set)} train samples and {len(self.test_set)} test samples")
+            log.info(f"Loaded {len(self.train_set)} train samples and {len(self.test_set)} test samples")
             return
 
         train_folder.mkdir(parents=True, exist_ok=True)
@@ -94,7 +96,7 @@ class MyDataset(Dataset):
         labels = torch.tensor(labels, dtype=torch.long)
 
         torch.save({"spectrograms": spectrograms, "labels": labels}, f"{save_folder}/{split}.pt")
-        print(f"Saved {len(dataset)} spectrograms to {save_folder} (shape: {spectrograms.shape})")
+        log.info(f"Saved {len(dataset)} spectrograms to {save_folder} (shape: {spectrograms.shape})")
 
         tensor_dataset = TensorDataset(spectrograms, labels)
         return tensor_dataset
@@ -114,16 +116,16 @@ class MyDataset(Dataset):
             train_ds.save_to_disk(save_path)
             test_ds.save_to_disk(save_path)
 
-            print(f"Successfully downloaded dataset to {save_path}")
+            log.info(f"Successfully downloaded dataset to {save_path}")
         except Exception as e:
-            print(f"Failed to download {dataset}: {e}")
+            log.info(f"Failed to download {dataset}: {e}")
 
         return train_ds, test_ds
 
 
 def preprocess(data_path: Path, output_folder: Path) -> None:
     """Preprocess the raw data and save it to the output folder."""
-    print("Preprocessing data...")
+    log.info("Preprocessing data...")
     dataset = MyDataset(data_path)
     dataset.preprocess(output_folder)
 
