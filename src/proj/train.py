@@ -33,12 +33,17 @@ def train(
 ):
     dataset = MyDataset(data_dir)
     dataset.preprocess(Path(output_dir))
-    train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size)
+    train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
     
     statistics = {"loss": [], "accuracy": []}
 
     for e in tqdm(range(epochs), desc="Training"):
         model.train()
+
+        epoch_loss = 0.0
+        epoch_correct = 0
+        epoch_total = 0
+
         for audio, label in train_dataloader:
             audio, label = audio.to(DEVICE), label.to(DEVICE)
 
@@ -50,10 +55,10 @@ def train(
             loss.backward()
 
             optimizer.step()
-
-        statistics["loss"].append(loss.item())
-        statistics["accuracy"].append(accuracy.item())
-        log.info(f"\nEpoch: {e} | Loss: {loss.item()} | Accuracy: {accuracy.item()}")
+        
+        statistics["loss"].append(epoch_loss / epoch_total)
+        statistics["accuracy"].append(epoch_correct / epoch_total)
+        log.info(f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Accuracy: {(epoch_correct / epoch_total):.4f}")
 
         torch.save(model.state_dict(), model_name)
 
@@ -61,7 +66,7 @@ def train(
             model,
             dataset.test_set,
             batch_size,
-            model_name,
+            None,
             log
         )
 

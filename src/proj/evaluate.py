@@ -16,13 +16,14 @@ DEVICE = torch.device(
 
 def evaluate(
     model: Model,
-    dataset: TensorDataset,
+    test_set: TensorDataset,
     batch_size: int,
-    model_checkpoint: str,
-    log: Logger
+    log: Logger,
+    model_checkpoint: str | None = None
 ):
-    model.load_state_dict(torch.load(model_checkpoint, weights_only=False))
-    test_dataloader = torch.utils.data.DataLoader(dataset, batch_size)
+    if model_checkpoint:
+        model.load_state_dict(torch.load(model_checkpoint, weights_only=False))
+    test_dataloader = torch.utils.data.DataLoader(test_set, batch_size, shuffle=True)
 
     model.eval()
     correct, total = 0, 0
@@ -55,8 +56,8 @@ def main():
         model,
         ds.test_set,
         train_cfg.hyperparameters.batch_size,
-        train_cfg.paths.model_name,
-        log
+        log,
+        train_cfg.paths.model_name
     )  
 
 if __name__ == "__main__":

@@ -68,15 +68,15 @@ class MyDataset(Dataset):
             if original_sr != target_sr:
                 waveform = librosa.resample(waveform, orig_sr=original_sr, target_sr=target_sr)
 
-                mel_spec = librosa.feature.melspectrogram(
-                    y=waveform,
-                    sr=target_sr,
-                    n_fft=n_fft,
-                    hop_length=hop_length,
-                    n_mels=n_mels,
-                    fmin=50,
-                    fmax=14000,
-                )
+            mel_spec = librosa.feature.melspectrogram(
+                y=waveform,
+                sr=target_sr,
+                n_fft=n_fft,
+                hop_length=hop_length,
+                n_mels=n_mels,
+                fmin=50,
+                fmax=14000,
+            )
 
             mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
