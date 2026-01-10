@@ -60,7 +60,7 @@ def train(
         
         statistics["loss"].append(epoch_loss / epoch_total)
         statistics["accuracy"].append(epoch_correct / epoch_total)
-        log.info(f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Accuracy: {(epoch_correct / epoch_total):.4f}")
+        log.info(f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Train accuracy: {(epoch_correct / epoch_total):.4f}")
 
         torch.save(model.state_dict(), model_name)
 
@@ -68,7 +68,6 @@ def train(
             model,
             dataset.test_set,
             batch_size,
-            log,
             None
         )
 

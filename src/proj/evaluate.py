@@ -1,10 +1,11 @@
 import torch
 import logging
-from logging import Logger
 from hydra import initialize, compose
 from proj.model import Model
 from proj.data import MyDataset
 from torch.utils.data import TensorDataset
+
+log = logging.getLogger(__name__)
 
 DEVICE = torch.device(
         "cuda"
@@ -18,7 +19,6 @@ def evaluate(
     model: Model,
     test_set: TensorDataset,
     batch_size: int,
-    log: Logger,
     model_checkpoint: str | None = None
 ):
     if model_checkpoint:
@@ -36,7 +36,7 @@ def evaluate(
             correct += (prediction.argmax(dim=1) == label).float().sum().item()
             total += label.size(0)
         
-    log.info(f"Model accuracy: {correct / total}")
+    log.info(f"Model eval accuracy: {(correct / total):.4f}")
 
 
 def main():
@@ -50,13 +50,10 @@ def main():
     ds = MyDataset(train_cfg.paths.data_dir)
     ds.preprocess(train_cfg.paths.output_dir)
 
-    log = logging.getLogger(__name__)
-
     evaluate(
         model,
         ds.test_set,
         train_cfg.hyperparameters.batch_size,
-        log,
         train_cfg.paths.model_name
     )  
 
