@@ -1,6 +1,6 @@
 hyperparameters:
   batch_size: 32
-  epochs: 10
+  epochs: 30
 
 optimizer:
   _target_: torch.optim.Adam
