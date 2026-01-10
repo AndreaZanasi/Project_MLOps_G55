@@ -1,5 +1,6 @@
 from proj.model import Model
 from proj.data import MyDataset
+from proj.evaluate import evaluate
 import torch
 import logging
 import hydra
@@ -7,7 +8,7 @@ from omegaconf import OmegaConf
 from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 log = logging.getLogger(__name__)
 
@@ -20,9 +21,9 @@ DEVICE = torch.device(
     )
 
 def train(
-        model,
         optimizer, 
         criterion,
+        model: Model,
         batch_size: int = 32,
         epochs: int = 10,
         data_dir: str = "data/raw",
@@ -56,6 +57,14 @@ def train(
 
         torch.save(model.state_dict(), model_name)
 
+        evaluate(
+            model,
+            dataset.test_set,
+            batch_size,
+            model_name,
+            log
+        )
+
     log.info("Training complete")
 
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
@@ -79,9 +88,9 @@ def main():
     model.to(DEVICE)
 
     train(
-        model,
         hydra.utils.instantiate(train_cfg.optimizer, params=model.parameters()),
         hydra.utils.instantiate(train_cfg.criterion),
+        model,
         train_cfg.hyperparameters.batch_size,
         train_cfg.hyperparameters.epochs,
         train_cfg.paths.data_dir,

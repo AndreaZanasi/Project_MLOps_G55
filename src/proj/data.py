@@ -26,11 +26,11 @@ class MyDataset(Dataset):
 
     def preprocess(self, output_folder: Path) -> None:
         """Preprocess the raw data and save it to the output folder."""
-        train_folder = output_folder / "train"
-        test_folder = output_folder / "test"
+        train_folder = Path(f"{output_folder}/train")
+        test_folder = Path(f"{output_folder}/test")
 
-        train_file = train_folder / "train.pt"
-        test_file = test_folder / "test.pt"
+        train_file = Path(f"{train_folder}/train.pt")
+        test_file = Path(f"{test_folder}/test.pt")
 
         if train_file.exists() and test_file.exists():
             log.info(f"Preprocessed data already exists in {output_folder}, loading from disk...")
