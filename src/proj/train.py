@@ -81,28 +81,22 @@ def train(
 
 @hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
 def main(cfg):
-    with initialize(config_path="../../configs", version_base="1.1"):
-        cfg.train_cfg = compose(config_name="train_cfg.yaml")
-        cfg.model_cfg = compose(config_name="model_cfg.yaml")
+    log.info("Configuration:")
+    log.info(OmegaConf.to_yaml(cfg))
 
-    log.info("Training Configuration:")
-    log.info(OmegaConf.to_yaml(cfg.train_cfg))
-    log.info("\nModel Configuration:")
-    log.info(OmegaConf.to_yaml(cfg.model_cfg))
-
-    model = Model(cfg.model_cfg)
+    model = Model(cfg)
     model.to(DEVICE)
 
     train(
-        hydra.utils.instantiate(cfg.train_cfg.optimizer, params=model.parameters()),
-        hydra.utils.instantiate(cfg.train_cfg.criterion),
+        hydra.utils.instantiate(cfg.optimizer, params=model.parameters()),
+        hydra.utils.instantiate(cfg.criterion),
         model,
-        cfg.train_cfg.hyperparameters.batch_size,
-        cfg.train_cfg.hyperparameters.epochs,
-        cfg.train_cfg.paths.data_dir,
-        cfg.train_cfg.paths.output_dir,
-        cfg.train_cfg.paths.figures_dir,
-        cfg.train_cfg.paths.model_name
+        cfg.hyperparameters.batch_size,
+        cfg.hyperparameters.epochs,
+        cfg.paths.data_dir,
+        cfg.paths.output_dir,
+        cfg.paths.figures_dir,
+        cfg.paths.model_name
     )
 
 if __name__ == "__main__":

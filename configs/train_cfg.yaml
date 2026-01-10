@@ -1,5 +1,5 @@
 hyperparameters:
-  batch_size: 32
+  batch_size: 64
   epochs: 30
 
 optimizer:
