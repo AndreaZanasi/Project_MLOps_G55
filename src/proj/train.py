@@ -68,8 +68,8 @@ def train(
             model,
             dataset.test_set,
             batch_size,
-            None,
-            log
+            log,
+            None
         )
 
     log.info("Training complete")
