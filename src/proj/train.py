@@ -51,10 +51,12 @@ def train(
 
             prediction = model(audio)
             loss = criterion(prediction, label)
-            accuracy = (prediction.argmax(dim=1) == label).float().mean()
             loss.backward()
-
             optimizer.step()
+
+            epoch_loss += loss.item() * label.size(0)
+            epoch_correct += (prediction.argmax(dim=1) == label).sum().item()
+            epoch_total += label.size(0)
         
         statistics["loss"].append(epoch_loss / epoch_total)
         statistics["accuracy"].append(epoch_correct / epoch_total)
