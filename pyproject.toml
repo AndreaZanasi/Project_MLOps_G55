@@ -8,6 +8,7 @@ version = "0.0.1"
 description = "Project for the MLOps Course 2026"
 authors = [
   { name = "AndreaZanasi", email = "your@email.com" },
+  { name = "DavideMecugni", email = "s253128@dtu.dk"}
 ]
 license = { file = "LICENSE" }
 keywords = ["machine learning", "MLOps"]
