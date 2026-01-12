@@ -20,9 +20,13 @@ class MyDataset(Dataset):
 
     def __len__(self) -> int:
         """Return the length of the dataset."""
+        return len(self.train_set) if self.train_set is not None else 0
 
     def __getitem__(self, index: int):
         """Return a given sample from the dataset."""
+        if self.train_set is None:
+            raise ValueError("Dataset not preprocessed. Call preprocess() first.")
+        return self.train_set[index]
 
     def preprocess(self, output_folder: Path) -> None:
         """Preprocess the raw data and save it to the output folder."""

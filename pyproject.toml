@@ -8,6 +8,7 @@ version = "0.0.1"
 description = "Project for the MLOps Course 2026"
 authors = [
   { name = "AndreaZanasi", email = "your@email.com" },
+  { name = "DavideMecugni", email = "s253128@dtu.dk"}
 ]
 license = { file = "LICENSE" }
 keywords = ["machine learning", "MLOps"]
@@ -22,9 +23,11 @@ dependencies = [
     "fastapi==0.115.6",
     "hydra-core>=1.3.2",
     "librosa>=0.11.0",
+    "lightning>=2.6.0",
     "matplotlib>=3.10.8",
     "ruff>=0.1.3",
     "soundfile>=0.13.1",
+    "tensorboard>=2.20.0",
     "torch<2.6.0",
     "torchaudio<2.6.0",
     "torchvision<0.21.0",
