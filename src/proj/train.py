@@ -1,5 +1,6 @@
 from proj.model import Model
 from proj.data import MyDataset
+from proj.evaluate import evaluate
 import torch
 import logging
 import hydra
@@ -7,7 +8,7 @@ from omegaconf import OmegaConf
 from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
-import matplotlib as plt
+import matplotlib.pyplot as plt
 
 log = logging.getLogger(__name__)
 
@@ -20,9 +21,9 @@ DEVICE = torch.device(
     )
 
 def train(
-        model,
         optimizer, 
         criterion,
+        model: Model,
         batch_size: int = 32,
         epochs: int = 10,
         data_dir: str = "data/raw",
@@ -32,12 +33,17 @@ def train(
 ):
     dataset = MyDataset(data_dir)
     dataset.preprocess(Path(output_dir))
-    train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size)
+    train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
     
     statistics = {"loss": [], "accuracy": []}
 
     for e in tqdm(range(epochs), desc="Training"):
         model.train()
+
+        epoch_loss = 0.0
+        epoch_correct = 0
+        epoch_total = 0
+
         for audio, label in train_dataloader:
             audio, label = audio.to(DEVICE), label.to(DEVICE)
 
@@ -45,16 +51,25 @@ def train(
 
             prediction = model(audio)
             loss = criterion(prediction, label)
-            accuracy = (prediction.argmax(dim=1) == label).float().mean()
             loss.backward()
-
             optimizer.step()
 
-        statistics["loss"].append(loss.item())
-        statistics["accuracy"].append(accuracy.item())
-        log.info(f"\nEpoch: {e} | Loss: {loss.item()} | Accuracy: {accuracy.item()}")
+            epoch_loss += loss.item() * label.size(0)
+            epoch_correct += (prediction.argmax(dim=1) == label).sum().item()
+            epoch_total += label.size(0)
+        
+        statistics["loss"].append(epoch_loss / epoch_total)
+        statistics["accuracy"].append(epoch_correct / epoch_total)
+        log.info(f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Train accuracy: {(epoch_correct / epoch_total):.4f}")
 
         torch.save(model.state_dict(), model_name)
+
+        evaluate(
+            model,
+            dataset.test_set,
+            batch_size,
+            None
+        )
 
     log.info("Training complete")
 
@@ -65,29 +80,24 @@ def train(
     axs[1].set_title("Train accuracy")
     fig.savefig(f"{figures_dir}/training_statistics.png")
 
-def main():
-    with initialize(config_path="../../configs", version_base="1.1"):
-        train_cfg = compose(config_name="train_cfg.yaml")
-        model_cfg = compose(config_name="model_cfg.yaml")
+@hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
+def main(cfg):
+    log.info("Configuration:")
+    log.info(OmegaConf.to_yaml(cfg))
 
-    log.info("Training Configuration:")
-    log.info(OmegaConf.to_yaml(train_cfg))
-    log.info("\nModel Configuration:")
-    log.info(OmegaConf.to_yaml(model_cfg))
-
-    model = Model(model_cfg)
+    model = Model(cfg)
     model.to(DEVICE)
 
     train(
+        hydra.utils.instantiate(cfg.optimizer, params=model.parameters()),
+        hydra.utils.instantiate(cfg.criterion),
         model,
-        hydra.utils.instantiate(train_cfg.optimizer, params=model.parameters()),
-        hydra.utils.instantiate(train_cfg.criterion),
-        train_cfg.hyperparameters.batch_size,
-        train_cfg.hyperparameters.epochs,
-        train_cfg.paths.data_dir,
-        train_cfg.paths.output_dir,
-        train_cfg.paths.figures_dir,
-        train_cfg.paths.model_name
+        cfg.hyperparameters.batch_size,
+        cfg.hyperparameters.epochs,
+        cfg.paths.data_dir,
+        cfg.paths.output_dir,
+        cfg.paths.figures_dir,
+        cfg.paths.model_name
     )
 
 if __name__ == "__main__":
