@@ -182,6 +182,8 @@ outputs/
 figures/*
 models/*
 .ruff_cache/
+logs/
+checkpoints/
 
 # HPC Scripts
 train.sh

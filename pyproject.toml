@@ -66,4 +66,9 @@ explicit = true
 line-length = 120
 
 [tool.coverage.run]
-omit = ["tests/*"]
+omit = [
+    "tests/*",
+    "/tmp/*",
+    "**/tmp*",
+    "**/_remote_module_non_scriptable.py"
+]
