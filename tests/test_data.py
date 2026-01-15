@@ -1,3 +1,4 @@
+import re
 from torch.utils.data import Dataset
 
 from proj.data import MyDataset
@@ -21,5 +22,6 @@ class TestClass:
     def test_error_dataset_not_preprocessed(self):
         """Test error when accessing item before preprocessing."""
         dataset = MyDataset("data/raw")
-        with pytest.raises(ValueError, match="Dataset not preprocessed. Call preprocess() first."):
+        msg = "Dataset not preprocessed. Call preprocess() first."
+        with pytest.raises(ValueError, match=re.escape(msg)):
             _ = dataset[0]
