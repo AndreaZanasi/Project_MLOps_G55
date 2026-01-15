@@ -38,7 +38,7 @@ def train(
     train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
     
     statistics = {"loss": [], "accuracy": []}
-    best_accuracy = 0
+    best_accuracy = 0.0
 
     for e in tqdm(range(epochs), desc="Training"):
         model.train()
@@ -46,7 +46,6 @@ def train(
         epoch_loss = 0.0
         epoch_correct = 0
         epoch_total = 0
-        prev_val_acc = 0
 
         for audio, label in train_dataloader:
             audio, label = audio.to(DEVICE), label.to(DEVICE)
@@ -77,9 +76,12 @@ def train(
             None
         )
 
-        if e == 0 or val_acc > prev_val_acc:
+        if e == 0 or val_acc > best_accuracy:
             best_accuracy = val_acc
             torch.save(model.state_dict(), model_name)
+            log.info(
+                f"New best model saved with validation accuracy: {val_acc:.4f}"
+            )
 
     log.info("Training complete")
 
