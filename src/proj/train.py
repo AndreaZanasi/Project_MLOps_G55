@@ -5,7 +5,6 @@ import torch
 import logging
 import hydra
 from omegaconf import OmegaConf
-from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt

@@ -1,4 +1,3 @@
-from torch.utils.data import Dataset
 
 from proj.model import Model
 
