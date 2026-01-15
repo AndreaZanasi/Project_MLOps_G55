@@ -179,3 +179,10 @@ cython_debug/
 
 data/
 outputs/
+figures/*
+models/*
+.ruff_cache/
+
+# HPC Scripts
+train.sh
+HPC/
