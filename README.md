@@ -71,6 +71,72 @@ The directory structure of the project looks like this:
 └── tasks.py                  # Project tasks
 ```
 
+# Docker Usage
+
+## Building the images
+
+All build commands must be executed from the project root directory.
+
+| Image Type | Dockerfile |
+| :--- | :--- | :--- |
+| **Training (CPU)** | `dockerfiles/train_cpu.dockerfile` |
+| **Training (GPU)** | `dockerfiles/train_gpu.dockerfile` | 
+| **Evaluation** | `dockerfiles/evaluate.dockerfile` |
+
+### Build commands
+
+**1. CPU training image**  
+For local testing.
+```bash
+docker build -f dockerfiles/train_cpu.dockerfile . -t proj_train_cpu:latest
+```
+
+**2. GPU training image**  
+Uses NVIDIA's PyTorch base image. Requires NVIDIA drivers.
+```bash
+docker build -f dockerfiles/train_gpu.dockerfile . -t proj_train_gpu:latest
+```
+
+**3. Evaluation image**  
+For running model benchmarks.
+```bash
+docker build -f dockerfiles/evaluate.dockerfile . -t proj_eval:latest
+```
+
+---
+
+## Running the containers
+
+### 1. CPU training
+
+```bash
+docker run --rm \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/models:/models \
+  -v $(pwd)/reports:/reports \
+  proj_train_cpu:latest
+```
+
+### 2. GPU Accelerated Training
+
+```bash
+docker run --rm --gpus all \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/models:/models \
+  -v $(pwd)/reports:/reports \
+  proj_train_gpu:latest
+```
+
+### 3. Model evaluation
+
+```bash
+docker run --rm \
+  -v $(pwd)/models:/models \
+  -v $(pwd)/data:/data \
+  proj_eval:latest
+```
+
+
 
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
