@@ -1,5 +1,6 @@
 import torch
 import logging
+import wandb
 from hydra import initialize, compose
 from proj.model import Model
 from proj.data import MyDataset
@@ -17,6 +18,7 @@ DEVICE = torch.device(
 
 def evaluate(
     model: Model,
+    run: wandb.Run,
     test_set: TensorDataset,
     batch_size: int,
     model_checkpoint: str | None = None
@@ -35,8 +37,12 @@ def evaluate(
             prediction = model(audio)
             correct += (prediction.argmax(dim=1) == label).float().sum().item()
             total += label.size(0)
-        
-    log.info(f"Model eval accuracy: {(correct / total):.4f}")
+
+    accuracy = correct / total
+    log.info(f"Model eval accuracy: {accuracy:.4f}")
+    run.log({"eval_accuracy": accuracy})
+
+    return accuracy
 
 
 def main():

@@ -38,6 +38,7 @@ def train(
     train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
     
     statistics = {"loss": [], "accuracy": []}
+    best_accuracy = 0
 
     for e in tqdm(range(epochs), desc="Training"):
         model.train()
@@ -45,6 +46,7 @@ def train(
         epoch_loss = 0.0
         epoch_correct = 0
         epoch_total = 0
+        prev_val_acc = 0
 
         for audio, label in train_dataloader:
             audio, label = audio.to(DEVICE), label.to(DEVICE)
@@ -67,14 +69,17 @@ def train(
         run.log({"train_loss": loss, "train_accuracy" : accuracy})
         log.info(f"Epoch: {e} | Loss: {loss:.4f} | Train accuracy: {accuracy:.4f}")
 
-        torch.save(model.state_dict(), model_name)
-
-        evaluate(
+        val_acc = evaluate(
             model,
+            run,
             dataset.test_set,
             batch_size,
             None
         )
+
+        if e == 0 or val_acc > prev_val_acc:
+            best_accuracy = val_acc
+            torch.save(model.state_dict(), model_name)
 
     log.info("Training complete")
 
@@ -85,6 +90,16 @@ def train(
     axs[1].set_title("Train accuracy")
     fig.savefig(f"{figures_dir}/training_statistics.png")
 
+    artifact = wandb.Artifact(
+        name="species_recognition_model",
+        type="model",
+        description="A model trained to recognize species based on different animal vocalizations",
+        metadata={"accuracy": best_accuracy}
+    )
+    artifact.add_file(model_name)
+    run.log_artifact(artifact)
+
+    run.log({"training_statistics": wandb.Image(fig)})
     run.finish()
 
 @hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
