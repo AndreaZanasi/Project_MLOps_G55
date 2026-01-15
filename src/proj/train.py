@@ -2,6 +2,7 @@ from proj.model import Model
 from proj.data import MyDataset
 from proj.evaluate import evaluate
 import torch
+import wandb
 import logging
 import hydra
 from omegaconf import OmegaConf
@@ -24,12 +25,13 @@ def train(
         optimizer, 
         criterion,
         model: Model,
+        run: wandb.Run,
         batch_size: int = 32,
         epochs: int = 10,
         data_dir: str = "data/raw",
         output_dir: str = "data/processed",
         figures_dir: str = "reports/figures",
-        model_name: str = "models/model.pt"
+        model_name: str = "models/model.pt",
 ):
     dataset = MyDataset(data_dir)
     dataset.preprocess(Path(output_dir))
@@ -58,9 +60,12 @@ def train(
             epoch_correct += (prediction.argmax(dim=1) == label).sum().item()
             epoch_total += label.size(0)
         
-        statistics["loss"].append(epoch_loss / epoch_total)
-        statistics["accuracy"].append(epoch_correct / epoch_total)
-        log.info(f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Train accuracy: {(epoch_correct / epoch_total):.4f}")
+        loss = epoch_loss / epoch_total
+        accuracy = epoch_correct / epoch_total
+        statistics["loss"].append(loss)
+        statistics["accuracy"].append(accuracy)
+        run.log({"train_loss": loss, "train_accuracy" : accuracy})
+        log.info(f"Epoch: {e} | Loss: {loss:.4f} | Train accuracy: {accuracy:.4f}")
 
         torch.save(model.state_dict(), model_name)
 
@@ -80,8 +85,17 @@ def train(
     axs[1].set_title("Train accuracy")
     fig.savefig(f"{figures_dir}/training_statistics.png")
 
+    run.finish()
+
 @hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
 def main(cfg):
+
+    run = wandb.init(
+        entity="MLOps_G55",
+        project="Project_MLOps_G55",
+        config=OmegaConf.to_object(cfg)
+    )
+
     log.info("Configuration:")
     log.info(OmegaConf.to_yaml(cfg))
 
@@ -92,6 +106,7 @@ def main(cfg):
         hydra.utils.instantiate(cfg.optimizer, params=model.parameters()),
         hydra.utils.instantiate(cfg.criterion),
         model,
+        run,
         cfg.hyperparameters.batch_size,
         cfg.hyperparameters.epochs,
         cfg.paths.data_dir,
