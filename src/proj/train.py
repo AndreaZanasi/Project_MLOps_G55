@@ -40,6 +40,8 @@ def train(
     statistics = {"loss": [], "accuracy": []}
     best_accuracy = 0.0
 
+    Path(model_name).mkdir(parents=True, exist_ok=True)
+
     for e in tqdm(range(epochs), desc="Training"):
         model.train()
 
