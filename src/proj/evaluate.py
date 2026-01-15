@@ -7,20 +7,10 @@ from torch.utils.data import TensorDataset
 
 log = logging.getLogger(__name__)
 
-DEVICE = torch.device(
-        "cuda"
-        if torch.cuda.is_available()
-        else "mps"
-        if torch.backends.mps.is_available()
-        else "cpu"
-    )
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
-def evaluate(
-    model: Model,
-    test_set: TensorDataset,
-    batch_size: int,
-    model_checkpoint: str | None = None
-):
+
+def evaluate(model: Model, test_set: TensorDataset, batch_size: int, model_checkpoint: str | None = None):
     if model_checkpoint:
         model.load_state_dict(torch.load(model_checkpoint, weights_only=False))
     test_dataloader = torch.utils.data.DataLoader(test_set, batch_size, shuffle=True)
@@ -35,7 +25,7 @@ def evaluate(
             prediction = model(audio)
             correct += (prediction.argmax(dim=1) == label).float().sum().item()
             total += label.size(0)
-        
+
     log.info(f"Model eval accuracy: {(correct / total):.4f}")
 
 
@@ -50,12 +40,8 @@ def main():
     ds = MyDataset(train_cfg.paths.data_dir)
     ds.preprocess(train_cfg.paths.output_dir)
 
-    evaluate(
-        model,
-        ds.test_set,
-        train_cfg.hyperparameters.batch_size,
-        train_cfg.paths.model_name
-    )  
+    evaluate(model, ds.test_set, train_cfg.hyperparameters.batch_size, train_cfg.paths.model_name)
+
 
 if __name__ == "__main__":
     main()
