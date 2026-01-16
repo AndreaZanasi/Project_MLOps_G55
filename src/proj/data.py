@@ -52,9 +52,6 @@ class MyDataset(Dataset):
         self.train_set = self.spec_to_tensors(train_ds, train_folder, "train")
         self.test_set = self.spec_to_tensors(test_ds, test_folder, "test")
 
-        print(self.train_set.shape)
-        print(self.test_set.shape)
-
     def spec_to_tensors(self, dataset, save_folder: Path, split: str) -> None:
         target_sr = 32000
         n_mels = 64
