@@ -6,7 +6,6 @@ import wandb
 import logging
 import hydra
 from omegaconf import OmegaConf
-from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -22,25 +21,25 @@ DEVICE = torch.device(
     )
 
 def train(
-        optimizer, 
+        optimizer,
         criterion,
         model: Model,
-        run: wandb.Run,
+        run: wandb.Run | None,
+        dataset: MyDataset,
         batch_size: int = 32,
         epochs: int = 10,
-        data_dir: str = "data/raw",
-        output_dir: str = "data/processed",
         figures_dir: str = "reports/figures",
-        model_name: str = "models/model.pt",
+        model_dir: str = "models",
+        model_name: str = "model.pth",
+        log_wandb: bool = True
 ):
-    dataset = MyDataset(data_dir)
-    dataset.preprocess(Path(output_dir))
     train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
-    
+
     statistics = {"loss": [], "accuracy": []}
     best_accuracy = 0.0
 
-    Path(model_name).parent.mkdir(parents=True, exist_ok=True)
+    Path(model_dir).mkdir(parents=True, exist_ok=True)
+    Path(figures_dir).mkdir(parents=True, exist_ok=True)
 
     for e in tqdm(range(epochs), desc="Training"):
         model.train()
@@ -67,13 +66,15 @@ def train(
         accuracy = epoch_correct / epoch_total
         statistics["loss"].append(loss)
         statistics["accuracy"].append(accuracy)
-        run.log({"train_loss": loss, "train_accuracy" : accuracy})
+
+        if log_wandb:
+            run.log({"train_loss": loss, "train_accuracy" : accuracy})
         log.info(f"Epoch: {e} | Loss: {loss:.4f} | Train accuracy: {accuracy:.4f}")
 
         val_acc = evaluate(
             model,
             run,
-            dataset.test_set,
+            dataset,
             batch_size,
             None
         )
@@ -94,26 +95,29 @@ def train(
     axs[1].set_title("Train accuracy")
     fig.savefig(f"{figures_dir}/training_statistics.png")
 
-    artifact = wandb.Artifact(
-        name="species_recognition_model",
-        type="model",
-        description="A model trained to recognize species based on different animal vocalizations",
-        metadata={"accuracy": best_accuracy}
-    )
-    artifact.add_file(model_name)
-    run.log_artifact(artifact)
+    if log_wandb:
+        artifact = wandb.Artifact(
+            name="species_recognition_model",
+            type="model",
+            description="A model trained to recognize species based on different animal vocalizations",
+            metadata={"accuracy": best_accuracy}
+        )
+        artifact.add_file(model_name)
+        run.log_artifact(artifact)
 
-    run.log({"training_statistics": wandb.Image(fig)})
-    run.finish()
+        run.log({"training_statistics": wandb.Image(fig)})
+        run.finish()
 
 @hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
 def main(cfg):
 
-    run = wandb.init(
-        entity="MLOps_G55",
-        project="Project_MLOps_G55",
-        config=OmegaConf.to_object(cfg)
-    )
+    if cfg.logging.log_wandb:
+        run = wandb.init(
+            entity="MLOps_G55",
+            project="Project_MLOps_G55",
+            config=OmegaConf.to_object(cfg)
+        )
+    else: run = None
 
     log.info("Configuration:")
     log.info(OmegaConf.to_yaml(cfg))
@@ -121,17 +125,22 @@ def main(cfg):
     model = Model(cfg)
     model.to(DEVICE)
 
+    dataset = MyDataset(cfg.paths.data_dir)
+    dataset.preprocess(Path(cfg.paths.output_dir))
+
     train(
         hydra.utils.instantiate(cfg.optimizer, params=model.parameters()),
         hydra.utils.instantiate(cfg.criterion),
         model,
         run,
+        dataset,
         cfg.hyperparameters.batch_size,
         cfg.hyperparameters.epochs,
         cfg.paths.data_dir,
         cfg.paths.output_dir,
         cfg.paths.figures_dir,
-        cfg.paths.model_name
+        cfg.paths.model_name,
+        cfg.logging.log_wandb
     )
 
 if __name__ == "__main__":
