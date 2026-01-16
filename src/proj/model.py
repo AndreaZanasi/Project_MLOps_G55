@@ -1,5 +1,6 @@
 from torch import nn
 import torch
+import hydra
 import torchvision.models as models
 
 """
@@ -38,13 +39,16 @@ class Model(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.resnet(x)
 
+@hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
+def main(model_cfg):
+    model = Model(model_cfg)
 
-if __name__ == "__main__":
-
-    model = Model()
     x = torch.rand(4, 1, 64, 1168)
 
     output = model(x)
     print(f"Input shape: {x.shape}")
     print(f"Output shape: {output.shape}")
     print(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
+
+if __name__ == "__main__":
+    main()

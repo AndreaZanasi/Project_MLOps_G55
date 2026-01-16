@@ -1,3 +1,8 @@
+
+from proj.model import Model
+from hydra import compose, initialize
+import torch
+from tests import OUT_SHAPE
 from torch.utils.data import Dataset
 
 from proj.model import Model
@@ -6,15 +11,12 @@ from proj.model import Model
 class TestClass:
     def test_model_instance(self):
         """Test the Model class."""
-        cfg = type("cfg", (), {})()  # Create a simple empty config object
-        cfg.parameters = type("parameters", (), {})()
-        cfg.parameters.features = [1, 64]
-        cfg.parameters.kernel_sizes = [(7, 7)]
-        cfg.parameters.strides = [(2, 2)]
-        cfg.parameters.paddings = [(3, 3)]
-        cfg.setup = type("setup", (), {})()
-        cfg.setup.pretrained = False
-        cfg.setup.num_classes = 32
+        with initialize(config_path="../configs", version_base="1.1"):
+            model_cfg = compose(config_name="model_cfg.yaml")
 
-        model = Model(cfg)
+        model = Model(model_cfg)
         assert isinstance(model, Model)
+
+        x = torch.rand(4, 1, 64, 1168)
+        output = model(x)
+        assert output.shape == OUT_SHAPE, f"Expected shape: {OUT_SHAPE}"

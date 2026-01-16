@@ -5,7 +5,6 @@ import torch
 import logging
 import hydra
 from omegaconf import OmegaConf
-from hydra import initialize, compose
 from tqdm import tqdm
 from pathlib import Path
 import matplotlib.pyplot as plt
@@ -25,19 +24,21 @@ def train(
         optimizer,
         criterion,
         model: Model,
+        dataset: MyDataset,
         batch_size: int = 32,
         epochs: int = 10,
-        data_dir: str = "data/raw",
-        output_dir: str = "data/processed",
         figures_dir: str = "reports/figures",
-        model_name: str = "models/model.pt"
+        model_dir: str = "models",
+        model_name: str = "model.pth",
+        log_wandb: bool = True
 ):
-    dataset = MyDataset(data_dir)
-    dataset.preprocess(Path(output_dir))
-    train_dataloader = torch.utils.data.DataLoader(
-        dataset.train_set, batch_size, shuffle=True)
+    
+    train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
 
     statistics = {"loss": [], "accuracy": []}
+
+    Path(model_dir).mkdir(parents=True, exist_ok=True)
+    Path(figures_dir).mkdir(parents=True, exist_ok=True)
 
     for e in tqdm(range(epochs), desc="Training"):
         model.train()
@@ -65,11 +66,11 @@ def train(
         log.info(
             f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Train accuracy: {(epoch_correct / epoch_total):.4f}")
 
-        torch.save(model.state_dict(), model_name)
+        torch.save(model.state_dict(), f"{model_dir}/{model_name}")
 
         evaluate(
             model,
-            dataset.test_set,
+            dataset,
             batch_size,
             None
         )
@@ -92,16 +93,20 @@ def main(cfg):
     model = Model(cfg)
     model.to(DEVICE)
 
+    dataset = MyDataset(cfg.paths.data_dir)
+    dataset.preprocess(Path(cfg.paths.output_dir))
+
     train(
         hydra.utils.instantiate(cfg.optimizer, params=model.parameters()),
         hydra.utils.instantiate(cfg.criterion),
         model,
+        dataset,
         cfg.hyperparameters.batch_size,
         cfg.hyperparameters.epochs,
-        cfg.paths.data_dir,
-        cfg.paths.output_dir,
         cfg.paths.figures_dir,
-        cfg.paths.model_name
+        cfg.paths.model_dir,
+        cfg.paths.model_name,
+        cfg.logging.log_wandb
     )
 
 

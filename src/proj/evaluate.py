@@ -3,7 +3,6 @@ import logging
 from hydra import initialize, compose
 from proj.model import Model
 from proj.data import MyDataset
-from torch.utils.data import TensorDataset
 
 log = logging.getLogger(__name__)
 
@@ -18,14 +17,14 @@ DEVICE = torch.device(
 
 def evaluate(
     model: Model,
-    test_set: TensorDataset,
+    dataset: MyDataset,
     batch_size: int,
     model_checkpoint: str | None = None
-):
+):  
     if model_checkpoint:
         model.load_state_dict(torch.load(model_checkpoint, weights_only=False))
-    test_dataloader = torch.utils.data.DataLoader(
-        test_set, batch_size, shuffle=True)
+        
+    test_dataloader = torch.utils.data.DataLoader(dataset.test_set, batch_size, shuffle=True)
 
     model.eval()
     correct, total = 0, 0
