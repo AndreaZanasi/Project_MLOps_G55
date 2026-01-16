@@ -3,6 +3,9 @@ from proj.model import Model
 from hydra import compose, initialize
 import torch
 from tests import OUT_SHAPE
+from torch.utils.data import Dataset
+
+from proj.model import Model
 
 
 class TestClass:

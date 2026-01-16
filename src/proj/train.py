@@ -12,15 +12,16 @@ import matplotlib.pyplot as plt
 log = logging.getLogger(__name__)
 
 DEVICE = torch.device(
-        "cuda"
-        if torch.cuda.is_available()
-        else "mps"
-        if torch.backends.mps.is_available()
-        else "cpu"
-    )
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
+
 
 def train(
-        optimizer, 
+        optimizer,
         criterion,
         model: Model,
         dataset: MyDataset,
@@ -33,6 +34,7 @@ def train(
 ):
     
     train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
+
     statistics = {"loss": [], "accuracy": []}
 
     Path(model_dir).mkdir(parents=True, exist_ok=True)
@@ -58,10 +60,11 @@ def train(
             epoch_loss += loss.item() * label.size(0)
             epoch_correct += (prediction.argmax(dim=1) == label).sum().item()
             epoch_total += label.size(0)
-        
+
         statistics["loss"].append(epoch_loss / epoch_total)
         statistics["accuracy"].append(epoch_correct / epoch_total)
-        log.info(f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Train accuracy: {(epoch_correct / epoch_total):.4f}")
+        log.info(
+            f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Train accuracy: {(epoch_correct / epoch_total):.4f}")
 
         torch.save(model.state_dict(), f"{model_dir}/{model_name}")
 
@@ -80,6 +83,7 @@ def train(
     axs[1].plot(statistics["accuracy"])
     axs[1].set_title("Train accuracy")
     fig.savefig(f"{figures_dir}/training_statistics.png")
+
 
 @hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
 def main(cfg):
@@ -104,6 +108,7 @@ def main(cfg):
         cfg.paths.model_name,
         cfg.logging.log_wandb
     )
+
 
 if __name__ == "__main__":
     main()
