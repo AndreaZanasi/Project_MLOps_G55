@@ -4,7 +4,7 @@ from proj.data import MyDataset
 
 from pathlib import Path
 
-from tests import TRAIN_LEN, TEST_LEN, SHAPE
+from tests import TRAIN_LEN, TEST_LEN, SHAPE, N_CLASSES
 
 
 class TestClass:
@@ -18,8 +18,9 @@ class TestClass:
         assert len(dataset.test_set) == TEST_LEN, f"Expected test set length: {TEST_LEN}"
 
         for ds in [dataset.train_set, dataset.test_set]:
-            for audio, _ in ds:
+            for audio, labels in ds:
                 assert audio.shape == SHAPE, f"Expected shape: {SHAPE}"
+                assert labels in range(N_CLASSES), f"Expected number of classes: {N_CLASSES}"
 
 
     def test_my_dataset_methods(self):
