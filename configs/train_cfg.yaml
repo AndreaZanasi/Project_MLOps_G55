@@ -16,4 +16,8 @@ paths:
   data_dir: data/raw
   output_dir: data/processed
   figures_dir: reports/figures
-  model_name: models/model.pth
+  model_dir: models
+  model_name: model.pth
+
+logging: 
+  log_wandb: true
