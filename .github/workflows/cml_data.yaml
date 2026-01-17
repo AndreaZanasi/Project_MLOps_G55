@@ -1,0 +1,41 @@
+name: DVC Workflow
+
+on:
+  pull_request:
+    branches: [ main, master, dev ]
+    paths:
+    - '**/*.dvc'
+    - '.dvc/**'
+    
+jobs:
+  dataset_statistics:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v5
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true 
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: uv sync --dev --locked 
+
+    - name: Pull data
+      run: |
+        dvc pull --no-run-cache
+
+    - name: Check data statistics & generate report
+      run: |
+        python src/proj/dataset_statistics.py > data_statistics.md
+
+    - name: Setup cml
+      uses: iterative/setup-cml@v2
+
+    - name: Comment on PR
+      env:
+        REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cml comment create data_statistics.md --watermark-title="Data Checker" # (1)!
