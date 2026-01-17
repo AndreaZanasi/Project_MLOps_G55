@@ -136,9 +136,8 @@ def main(cfg):
         dataset,
         cfg.hyperparameters.batch_size,
         cfg.hyperparameters.epochs,
-        cfg.paths.data_dir,
-        cfg.paths.output_dir,
         cfg.paths.figures_dir,
+        cfg.paths.model_dir,
         cfg.paths.model_name,
         cfg.logging.log_wandb
     )
