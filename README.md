@@ -78,7 +78,7 @@ The directory structure of the project looks like this:
 All build commands must be executed from the project root directory.
 
 | Image Type | Dockerfile |
-| :--- | :--- | :--- |
+| :--- | :--- |
 | **Training (CPU)** | `dockerfiles/train_cpu.dockerfile` |
 | **Training (GPU)** | `dockerfiles/train_gpu.dockerfile` | 
 | **Evaluation** | `dockerfiles/evaluate.dockerfile` |
