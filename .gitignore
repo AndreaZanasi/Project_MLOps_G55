@@ -192,3 +192,7 @@ HPC/
 
 # JSON credentials
 *.json
+
+*.pth
+*.ckpt
+artifacts/
