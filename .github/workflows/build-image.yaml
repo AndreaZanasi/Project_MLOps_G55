@@ -9,7 +9,7 @@ on:
       - 'pyproject.toml'  # ...or if dependencies change
 
 env:
-  PROJECT_ID: MLOPS-52
+  PROJECT_ID: mlops-52
   REGION: europe-west6
   REPO_NAME: docker-mlops52
   IMAGE_NAME: mlops-image
