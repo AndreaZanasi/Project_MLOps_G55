@@ -29,7 +29,8 @@ jobs:
       MODEL_NAME: ${{ needs.identify_event.outputs.model_name }}
     steps:
       - name: Echo model name
-        run: echo "Testing Model: $MODEL_NAME"
+        run: |
+          echo "Testing Model: $MODEL_NAME"
 
       - name: Checkout code
         uses: actions/checkout@v5
