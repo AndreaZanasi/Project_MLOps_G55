@@ -7,6 +7,7 @@ on:
       - 'dockerfiles/**'  # Only trigger if Docker-related files change
       - 'src/**'          # ...or if the source code changes
       - 'pyproject.toml'  # ...or if dependencies change
+      - '.github/*'       # ...or if workflows change
 
 env:
   PROJECT_ID: mlops-52
