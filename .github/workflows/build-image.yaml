@@ -1,0 +1,39 @@
+name: Build and Push Docker Image
+
+# This triggers the workflow every time you push to the "main" branch
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  PROJECT_ID: MLOPS-52
+  REGION: europe-west6
+  REPO_NAME: docker-mlops52
+  IMAGE_NAME: mlops-image
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Check out the code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. Log in to Google Cloud
+    - name: Google Auth
+      id: auth
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+    # 3. Set up Docker for GCP
+    - name: Docker Auth
+      run: |-
+        gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+    # 4. Build and Push the image
+    - name: Build and Push
+      run: |-
+        docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
