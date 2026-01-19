@@ -1,0 +1,45 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches: [ "main" ]  # Only build when code is accepted into main
+    paths:
+      - 'dockerfiles/**'  # Only trigger if Docker-related files change
+      - 'src/**'          # ...or if the source code changes
+      - 'pyproject.toml'  # ...or if dependencies change
+
+env:
+  PROJECT_ID: MLOPS-52
+  REGION: europe-west6
+  REPO_NAME: docker-mlops52
+  IMAGE_NAME: mlops-image
+
+jobs:
+  build_push_image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 1. Authenticate with GCP
+      - name: Auth with GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # 2. Configure Docker to talk to GCP
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      # 3. Build and Push
+      - name: Build and Push Container
+        run: |
+          docker build \
+            -f dockerfiles/Dockerfile \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            .
+          
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
