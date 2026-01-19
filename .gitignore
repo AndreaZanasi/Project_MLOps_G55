@@ -189,3 +189,10 @@ wandb/
 # HPC Scripts
 train.sh
 HPC/
+
+# JSON credentials
+*.json
+
+*.pth
+*.ckpt
+artifacts/

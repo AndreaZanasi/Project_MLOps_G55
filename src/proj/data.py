@@ -38,12 +38,16 @@ class MyDataset(Dataset):
         test_file = Path(f"{test_folder}/test.pt")
 
         if train_file.exists() and test_file.exists():
-            log.info(f"Preprocessed data already exists in {output_folder}, loading from disk...")
+            log.info(
+                f"Preprocessed data already exists in {output_folder}, loading from disk...")
             train_data = torch.load(train_file, weights_only=True)
             test_data = torch.load(test_file, weights_only=True)
-            self.train_set = TensorDataset(train_data["spectrograms"], train_data["labels"])
-            self.test_set = TensorDataset(test_data["spectrograms"], test_data["labels"])
-            log.info(f"Loaded {len(self.train_set)} train samples and {len(self.test_set)} test samples")
+            self.train_set = TensorDataset(
+                train_data["spectrograms"], train_data["labels"])
+            self.test_set = TensorDataset(
+                test_data["spectrograms"], test_data["labels"])
+            log.info(
+                f"Loaded {len(self.train_set)} train samples and {len(self.test_set)} test samples")
             return
 
         train_folder.mkdir(parents=True, exist_ok=True)
@@ -71,7 +75,8 @@ class MyDataset(Dataset):
             original_sr = audio["sampling_rate"]
 
             if original_sr != target_sr:
-                waveform = librosa.resample(waveform, orig_sr=original_sr, target_sr=target_sr)
+                waveform = librosa.resample(
+                    waveform, orig_sr=original_sr, target_sr=target_sr)
 
             mel_spec = librosa.feature.melspectrogram(
                 y=waveform,
@@ -88,7 +93,8 @@ class MyDataset(Dataset):
             # Pad/Truncate data since every file must be of the same length
             if mel_spec_db.shape[1] < target_length:
                 pad_width = target_length - mel_spec_db.shape[1]
-                mel_spec_db = np.pad(mel_spec_db, ((0, 0), (0, pad_width)), mode="constant", constant_values=-80.0)
+                mel_spec_db = np.pad(
+                    mel_spec_db, ((0, 0), (0, pad_width)), mode='constant', constant_values=-80.0)
             else:
                 mel_spec_db = mel_spec_db[:, :target_length]
 
@@ -100,8 +106,10 @@ class MyDataset(Dataset):
         spectrograms = torch.stack(spectrograms, dim=0)
         labels = torch.tensor(labels, dtype=torch.long)
 
-        torch.save({"spectrograms": spectrograms, "labels": labels}, f"{save_folder}/{split}.pt")
-        log.info(f"Saved {len(dataset)} spectrograms to {save_folder} (shape: {spectrograms.shape})")
+        torch.save({"spectrograms": spectrograms, "labels": labels},
+                   f"{save_folder}/{split}.pt")
+        log.info(
+            f"Saved {len(dataset)} spectrograms to {save_folder} (shape: {spectrograms.shape})")
 
         tensor_dataset = TensorDataset(spectrograms, labels)
         return tensor_dataset
