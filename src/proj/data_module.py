@@ -13,7 +13,7 @@ class AudioDataModule(L.LightningDataModule):
         output_dir: str = "data/processed",
         batch_size: int = 32,
         num_workers: int = 4,
-        val_split: float = 0.2
+        val_split: float = 0.2,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -46,9 +46,7 @@ class AudioDataModule(L.LightningDataModule):
             train_size = int((1 - self.val_split) * len(self.dataset.train_set))
             val_size = len(self.dataset.train_set) - train_size
 
-            self.train_dataset, self.val_dataset = random_split(
-                self.dataset.train_set, [train_size, val_size]
-            )
+            self.train_dataset, self.val_dataset = random_split(self.dataset.train_set, [train_size, val_size])
 
         if stage == "test" or stage is None:
             self.test_dataset = self.dataset.test_set
@@ -60,7 +58,7 @@ class AudioDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
-            persistent_workers=True if self.num_workers > 0 else False
+            persistent_workers=True if self.num_workers > 0 else False,
         )
 
     def val_dataloader(self):
@@ -70,7 +68,7 @@ class AudioDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            persistent_workers=True if self.num_workers > 0 else False
+            persistent_workers=True if self.num_workers > 0 else False,
         )
 
     def test_dataloader(self):
@@ -80,5 +78,5 @@ class AudioDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
-            persistent_workers=True if self.num_workers > 0 else False
+            persistent_workers=True if self.num_workers > 0 else False,
         )

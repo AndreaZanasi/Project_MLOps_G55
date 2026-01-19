@@ -24,11 +24,7 @@ class LightningAudioClassifier(L.LightningModule):
         self.resnet = models.resnet34(weights=weights)
 
         self.resnet.conv1 = nn.Conv2d(
-            features[0],
-            features[1],
-            kernel_size=kernel_sizes[0],
-            stride=strides[0],
-            padding=paddings[0]
+            features[0], features[1], kernel_size=kernel_sizes[0], stride=strides[0], padding=paddings[0]
         )
 
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features, cfg.setup.num_classes)
@@ -52,8 +48,8 @@ class LightningAudioClassifier(L.LightningModule):
         acc = (preds == labels).float().mean()
 
         # Lightning automatically handles logging
-        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True)
-        self.log('train_acc', acc, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train_loss", loss, on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train_acc", acc, on_step=True, on_epoch=True, prog_bar=True)
 
         return loss
 
@@ -66,8 +62,8 @@ class LightningAudioClassifier(L.LightningModule):
         preds = torch.argmax(outputs, dim=1)
         acc = (preds == labels).float().mean()
 
-        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log('val_acc', acc, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("val_acc", acc, on_step=False, on_epoch=True, prog_bar=True)
 
         return loss
 
@@ -80,8 +76,8 @@ class LightningAudioClassifier(L.LightningModule):
         preds = torch.argmax(outputs, dim=1)
         acc = (preds == labels).float().mean()
 
-        self.log('test_loss', loss, on_step=False, on_epoch=True)
-        self.log('test_acc', acc, on_step=False, on_epoch=True)
+        self.log("test_loss", loss, on_step=False, on_epoch=True)
+        self.log("test_acc", acc, on_step=False, on_epoch=True)
 
         return loss
 
@@ -90,11 +86,4 @@ class LightningAudioClassifier(L.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
 
-        return {
-            'optimizer': optimizer,
-            'lr_scheduler': {
-                'scheduler': scheduler,
-                'monitor': 'val_loss',
-                'frequency': 1
-            }
-        }
+        return {"optimizer": optimizer, "lr_scheduler": {"scheduler": scheduler, "monitor": "val_loss", "frequency": 1}}

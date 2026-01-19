@@ -1,0 +1,5 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = gs://data-bucket-mlops52
+    credentialpath = ../gcp.json
