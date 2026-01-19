@@ -1,6 +1,8 @@
+import re
 from torch.utils.data import Dataset
 
 from proj.data import MyDataset
+import pytest
 
 from pathlib import Path
 
@@ -30,3 +32,10 @@ class TestClass:
         assert hasattr(dataset, "spec_to_tensors")
         assert hasattr(dataset, "__len__")
         assert hasattr(dataset, "__getitem__")
+
+    def test_error_dataset_not_preprocessed(self):
+        """Test error when accessing item before preprocessing."""
+        dataset = MyDataset("data/raw")
+        msg = "Dataset not preprocessed. Call preprocess() first."
+        with pytest.raises(ValueError, match=re.escape(msg)):
+            _ = dataset[0]

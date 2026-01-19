@@ -66,6 +66,5 @@ def main():
         train_cfg.paths.model_name
     )
 
-
 if __name__ == "__main__":
     main()

@@ -36,6 +36,7 @@ def test_train_smoke(setup_train, tmp_path):
         optimizer,
         criterion,
         model,
+        None,
         mock_dataset,
         batch_size=1,
         epochs=1,

@@ -1,0 +1,36 @@
+name: "Run tests"
+
+on:
+  push:
+    branches: [ master, main, dev ]
+  pull_request:
+    branches: [ master, main, dev ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: ["3.12"]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        uv sync --dev --locked
+
+    - name: Test with pytest
+      env:
+          WANDB_API_KEY: ${{ secrets. WANDB_API_KEY }}
+      run: |
+        uv run pytest -v tests/

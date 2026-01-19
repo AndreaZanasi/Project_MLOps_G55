@@ -6,6 +6,7 @@ WINDOWS = os.name == "nt"
 PROJECT_NAME = "proj"
 PYTHON_VERSION = "3.12"
 
+
 # Project commands
 
 
@@ -14,6 +15,7 @@ def preprocess_data(ctx: Context) -> None:
     """Preprocess data."""
     ctx.run(f"uv run src/{PROJECT_NAME}/data.py data/raw data/processed",
             echo=True, pty=not WINDOWS)
+
 
 
 @task
@@ -35,13 +37,12 @@ def docker_build(ctx: Context, progress: str = "plain") -> None:
     ctx.run(
         f"docker build -t train:latest . -f dockerfiles/train.dockerfile --progress={progress}",
         echo=True,
-        pty=not WINDOWS
+        pty=not WINDOWS,
     )
     ctx.run(
-        f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}",
-        echo=True,
-        pty=not WINDOWS
+        f"docker build -t api:latest . -f dockerfiles/api.dockerfile --progress={progress}", echo=True, pty=not WINDOWS
     )
+
 
 # Documentation commands
 
@@ -51,6 +52,7 @@ def build_docs(ctx: Context) -> None:
     """Build documentation."""
     ctx.run("uv run mkdocs build --config-file docs/mkdocs.yaml --site-dir build",
             echo=True, pty=not WINDOWS)
+
 
 
 @task

@@ -23,11 +23,7 @@ def train_lightning(
     log_wandb: bool = True
 ):
     data_module = AudioDataModule(
-        data_dir=data_dir,
-        output_dir=output_dir,
-        batch_size=batch_size,
-        num_workers=4,
-        val_split=0.2
+        data_dir=data_dir, output_dir=output_dir, batch_size=batch_size, num_workers=4, val_split=0.2
     )
     
     model = LightningAudioClassifier(

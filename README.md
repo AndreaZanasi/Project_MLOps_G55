@@ -80,24 +80,24 @@ All build commands must be executed from the project root directory.
 | Image Type | Dockerfile |
 | :--- | :--- |
 | **Training (CPU)** | `dockerfiles/train_cpu.dockerfile` |
-| **Training (GPU)** | `dockerfiles/train_gpu.dockerfile` | 
+| **Training (GPU)** | `dockerfiles/train_gpu.dockerfile` |
 | **Evaluation** | `dockerfiles/evaluate.dockerfile` |
 
 ### Build commands
 
-**1. CPU training image**  
+**1. CPU training image**
 For local testing.
 ```bash
 docker build -f dockerfiles/train_cpu.dockerfile . -t proj_train_cpu:latest
 ```
 
-**2. GPU training image**  
+**2. GPU training image**
 Uses NVIDIA's PyTorch base image. Requires NVIDIA drivers.
 ```bash
 docker build -f dockerfiles/train_gpu.dockerfile . -t proj_train_gpu:latest
 ```
 
-**3. Evaluation image**  
+**3. Evaluation image**
 For running model benchmarks.
 ```bash
 docker build -f dockerfiles/evaluate.dockerfile . -t proj_eval:latest
