@@ -23,10 +23,10 @@ class Model(nn.Module):
         self.resnet = models.resnet34(weights=weights)
 
         self.resnet.conv1 = nn.Conv2d(
-            features[0], 
-            features[1], 
-            kernel_size=kernel_sizes[0], 
-            stride=strides[0], 
+            features[0],
+            features[1],
+            kernel_size=kernel_sizes[0],
+            stride=strides[0],
             padding=paddings[0]
         )
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     model = Model()
     x = torch.rand(4, 1, 64, 1168)
-    
+
     output = model(x)
     print(f"Input shape: {x.shape}")
     print(f"Output shape: {output.shape}")

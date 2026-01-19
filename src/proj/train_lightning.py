@@ -23,7 +23,7 @@ def train_lightning(
     learning_rate: float = 1e-3,
 ):
     """Train the model using PyTorch Lightning."""
-    
+
     # Initialize the data module
     data_module = AudioDataModule(
         data_dir=data_dir,
@@ -32,13 +32,13 @@ def train_lightning(
         num_workers=4,
         val_split=0.2
     )
-    
+
     # Initialize the Lightning module
     model = LightningAudioClassifier(
-        cfg=model_cfg, 
+        cfg=model_cfg,
         learning_rate=learning_rate
     )
-    
+
     # Setup callbacks
     checkpoint_callback = ModelCheckpoint(
         dirpath="checkpoints/",
@@ -47,7 +47,7 @@ def train_lightning(
         mode="min",
         save_top_k=3,
     )
-    
+
     early_stop_callback = EarlyStopping(
         monitor="val_loss",
         min_delta=0.00,
@@ -55,10 +55,10 @@ def train_lightning(
         verbose=False,
         mode="min"
     )
-    
+
     # Setup logger
     logger = TensorBoardLogger(log_dir, name="audio_classifier")
-    
+
     # Initialize trainer
     trainer = L.Trainer(
         max_epochs=max_epochs,
@@ -69,16 +69,16 @@ def train_lightning(
         log_every_n_steps=10,
         check_val_every_n_epoch=1,
     )
-    
+
     # Train the model
     trainer.fit(model, data_module)
-    
+
     # Test the model
     trainer.test(model, data_module)
-    
+
     log.info("Training complete!")
     log.info(f"Best model saved at: {checkpoint_callback.best_model_path}")
-    
+
     return trainer, model
 
 

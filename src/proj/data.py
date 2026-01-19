@@ -88,7 +88,7 @@ class MyDataset(Dataset):
             if mel_spec_db.shape[1] < target_length:
                 pad_width = target_length - mel_spec_db.shape[1]
                 mel_spec_db = np.pad(mel_spec_db, ((0, 0), (0, pad_width)), mode='constant', constant_values=-80.0)
-            else: 
+            else:
                 mel_spec_db = mel_spec_db[:, :target_length]
 
             tensor_data = torch.from_numpy(mel_spec_db).float().unsqueeze(0)

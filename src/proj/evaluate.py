@@ -35,7 +35,7 @@ def evaluate(
             prediction = model(audio)
             correct += (prediction.argmax(dim=1) == label).float().sum().item()
             total += label.size(0)
-        
+
     log.info(f"Model eval accuracy: {(correct / total):.4f}")
 
 
@@ -55,7 +55,7 @@ def main():
         ds.test_set,
         train_cfg.hyperparameters.batch_size,
         train_cfg.paths.model_name
-    )  
+    )
 
 if __name__ == "__main__":
     main()

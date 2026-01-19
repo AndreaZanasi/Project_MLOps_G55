@@ -21,7 +21,7 @@ DEVICE = torch.device(
     )
 
 def train(
-        optimizer, 
+        optimizer,
         criterion,
         model: Model,
         batch_size: int = 32,
@@ -34,7 +34,7 @@ def train(
     dataset = MyDataset(data_dir)
     dataset.preprocess(Path(output_dir))
     train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True)
-    
+
     statistics = {"loss": [], "accuracy": []}
 
     for e in tqdm(range(epochs), desc="Training"):
@@ -57,7 +57,7 @@ def train(
             epoch_loss += loss.item() * label.size(0)
             epoch_correct += (prediction.argmax(dim=1) == label).sum().item()
             epoch_total += label.size(0)
-        
+
         statistics["loss"].append(epoch_loss / epoch_total)
         statistics["accuracy"].append(epoch_correct / epoch_total)
         log.info(f"Epoch: {e} | Loss: {(epoch_loss / epoch_total):.4f} | Train accuracy: {(epoch_correct / epoch_total):.4f}")
