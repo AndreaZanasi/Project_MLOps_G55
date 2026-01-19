@@ -1,8 +1,10 @@
 import torch
 import logging
+import wandb
 from hydra import initialize, compose
 from proj.model import Model
 from proj.data import MyDataset
+
 
 log = logging.getLogger(__name__)
 
@@ -17,9 +19,11 @@ DEVICE = torch.device(
 
 def evaluate(
     model: Model,
+    run: wandb.Run | None,
     dataset: MyDataset,
     batch_size: int,
-    model_checkpoint: str | None = None
+    log_wandb: bool,
+    model_checkpoint: str | None = None,
 ):  
     if model_checkpoint:
         model.load_state_dict(torch.load(model_checkpoint, weights_only=False))
@@ -37,8 +41,12 @@ def evaluate(
             correct += (prediction.argmax(dim=1) == label).float().sum().item()
             total += label.size(0)
 
-    log.info(f"Model eval accuracy: {(correct / total):.4f}")
+    accuracy = correct / total
+    if log_wandb:
+        run.log({"eval_accuracy": accuracy})
+    log.info(f"Model eval accuracy: {accuracy:.4f}")
 
+    return accuracy
 
 def main():
     with initialize(config_path="../../configs", version_base="1.1"):

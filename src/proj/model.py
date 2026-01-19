@@ -7,7 +7,7 @@ import torchvision.models as models
 Saved 1357 train (shape: torch.Size([1357, 1, 64, 1168]))
 Saved 340 test (shape: torch.Size([340, 1, 64, 1168]))
 
-There are 32 species
+There are 32 classes
 """
 
 
