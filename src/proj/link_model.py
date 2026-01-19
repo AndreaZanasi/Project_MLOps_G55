@@ -23,7 +23,7 @@ def link_model(artifact_path: str, aliases: List[str] = ["staging"]) -> None:
     artifact.link(target_path=target_path, aliases=aliases)
     artifact.save()
     
-    typer.echo(f"Model linked to {target_path} with aliases {aliases}")
+    typer.echo(f"Success! Model linked to {target_path} with aliases {aliases}")
 
 if __name__ == "__main__":
     typer.run(link_model)

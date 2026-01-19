@@ -13,7 +13,6 @@ jobs:
       - name: Setting model environment variable and output
         id: set_output
         run: |
-          # This captures the registry path from the W&B webhook
           MODEL_PATH="${{ github.event.client_payload.artifact_version_string }}"
           echo "model_name=$MODEL_PATH" >> $GITHUB_OUTPUT
 
