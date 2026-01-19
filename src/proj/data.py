@@ -10,6 +10,7 @@ from datasets import load_dataset
 
 log = logging.getLogger(__name__)
 
+
 class MyDataset(Dataset):
     """My custom dataset."""
 
@@ -37,12 +38,16 @@ class MyDataset(Dataset):
         test_file = Path(f"{test_folder}/test.pt")
 
         if train_file.exists() and test_file.exists():
-            log.info(f"Preprocessed data already exists in {output_folder}, loading from disk...")
+            log.info(
+                f"Preprocessed data already exists in {output_folder}, loading from disk...")
             train_data = torch.load(train_file, weights_only=True)
             test_data = torch.load(test_file, weights_only=True)
-            self.train_set = TensorDataset(train_data["spectrograms"], train_data["labels"])
-            self.test_set = TensorDataset(test_data["spectrograms"], test_data["labels"])
-            log.info(f"Loaded {len(self.train_set)} train samples and {len(self.test_set)} test samples")
+            self.train_set = TensorDataset(
+                train_data["spectrograms"], train_data["labels"])
+            self.test_set = TensorDataset(
+                test_data["spectrograms"], test_data["labels"])
+            log.info(
+                f"Loaded {len(self.train_set)} train samples and {len(self.test_set)} test samples")
             return
 
         train_folder.mkdir(parents=True, exist_ok=True)
@@ -58,7 +63,7 @@ class MyDataset(Dataset):
         n_fft = 1024
         hop_length = 320
 
-        #This value was computed based on the average length of the audio files
+        # This value was computed based on the average length of the audio files
         target_length = 1168
 
         spectrograms = []
@@ -70,7 +75,8 @@ class MyDataset(Dataset):
             original_sr = audio["sampling_rate"]
 
             if original_sr != target_sr:
-                waveform = librosa.resample(waveform, orig_sr=original_sr, target_sr=target_sr)
+                waveform = librosa.resample(
+                    waveform, orig_sr=original_sr, target_sr=target_sr)
 
             mel_spec = librosa.feature.melspectrogram(
                 y=waveform,
@@ -84,11 +90,12 @@ class MyDataset(Dataset):
 
             mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-            #Pad/Truncate data since every file must be of the same length
+            # Pad/Truncate data since every file must be of the same length
             if mel_spec_db.shape[1] < target_length:
                 pad_width = target_length - mel_spec_db.shape[1]
-                mel_spec_db = np.pad(mel_spec_db, ((0, 0), (0, pad_width)), mode='constant', constant_values=-80.0)
-            else: 
+                mel_spec_db = np.pad(
+                    mel_spec_db, ((0, 0), (0, pad_width)), mode='constant', constant_values=-80.0)
+            else:
                 mel_spec_db = mel_spec_db[:, :target_length]
 
             tensor_data = torch.from_numpy(mel_spec_db).float().unsqueeze(0)
@@ -99,12 +106,13 @@ class MyDataset(Dataset):
         spectrograms = torch.stack(spectrograms, dim=0)
         labels = torch.tensor(labels, dtype=torch.long)
 
-        torch.save({"spectrograms": spectrograms, "labels": labels}, f"{save_folder}/{split}.pt")
-        log.info(f"Saved {len(dataset)} spectrograms to {save_folder} (shape: {spectrograms.shape})")
+        torch.save({"spectrograms": spectrograms, "labels": labels},
+                   f"{save_folder}/{split}.pt")
+        log.info(
+            f"Saved {len(dataset)} spectrograms to {save_folder} (shape: {spectrograms.shape})")
 
         tensor_dataset = TensorDataset(spectrograms, labels)
         return tensor_dataset
-
 
     def make_dataset(self) -> None:
         """Download all animal sound datasets across all configs and splits."""

@@ -1,11 +1,9 @@
 import lightning as L
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 from lightning.pytorch.loggers import TensorBoardLogger
-import hydra
 from omegaconf import OmegaConf
 from hydra import initialize, compose
 import logging
-from pathlib import Path
 from proj.lightning_model import LightningAudioClassifier
 from proj.data_module import AudioDataModule
 

@@ -13,12 +13,13 @@ import matplotlib.pyplot as plt
 log = logging.getLogger(__name__)
 
 DEVICE = torch.device(
-        "cuda"
-        if torch.cuda.is_available()
-        else "mps"
-        if torch.backends.mps.is_available()
-        else "cpu"
-    )
+    "cuda"
+    if torch.cuda.is_available()
+    else "mps"
+    if torch.backends.mps.is_available()
+    else "cpu"
+)
+
 
 def train(
         optimizer,
@@ -37,6 +38,9 @@ def train(
 
     statistics = {"loss": [], "accuracy": []}
     best_accuracy = 0.0
+
+    Path(model_dir).mkdir(parents=True, exist_ok=True)
+    Path(figures_dir).mkdir(parents=True, exist_ok=True)
 
     Path(model_dir).mkdir(parents=True, exist_ok=True)
     Path(figures_dir).mkdir(parents=True, exist_ok=True)
@@ -141,6 +145,7 @@ def main(cfg):
         cfg.paths.model_name,
         cfg.logging.log_wandb
     )
+
 
 if __name__ == "__main__":
     main()

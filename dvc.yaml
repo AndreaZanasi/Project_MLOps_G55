@@ -1,0 +1,8 @@
+stages:
+  prepare_data:
+    cmd: python src/proj/data.py data/raw data/processed
+    deps:
+    - src/proj/data.py
+    outs:
+    - data/processed
+    - data/raw
