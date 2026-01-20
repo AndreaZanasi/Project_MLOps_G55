@@ -6,7 +6,8 @@ on:
     paths:
     - '**/*.dvc'
     - '.dvc/**'
-    
+    - 'dvc.lock'
+
 jobs:
   dataset_statistics:
     runs-on: ubuntu-latest
