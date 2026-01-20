@@ -34,7 +34,7 @@ jobs:
         uv run dvc pull
 
     - name: Preprocess Data
-      run: python src/proj/data.py data/raw data/processed
+      run: uv run python src/proj/data.py data/raw data/processed
 
     - name: Check data statistics & generate report
       run: |
