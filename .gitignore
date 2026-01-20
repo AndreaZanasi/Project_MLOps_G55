@@ -196,3 +196,4 @@ HPC/
 *.pth
 *.ckpt
 artifacts/
+lightning_logs/
