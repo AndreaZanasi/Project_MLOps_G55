@@ -4,7 +4,7 @@ stages:
     cmd: python src/proj/data.py data/raw data/processed
     deps:
     - path: src/proj/data.py
-      md5: 4babf1575761ac6f9ab9fc5cd582f3ef
+      md5: fce22c1ffa3970a78cbc68ee04d8aa4e
       size: 5031
     outs:
     - path: data/processed

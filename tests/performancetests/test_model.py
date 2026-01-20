@@ -6,7 +6,7 @@ import wandb
 from hydra import initialize, compose
 
 sys.path.append(os.getcwd())
-from src.proj.lightning_model import LightningAudioClassifier
+from src.proj.lightning_model import LightningAudioClassifier # noqa: E402
 
 def load_model(artifact_path):
     api = wandb.Api(api_key=os.getenv("WANDB_API_KEY"))
