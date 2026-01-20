@@ -30,14 +30,14 @@ jobs:
 
     - name: Pull data
       run: |
-        uv run dvc pull --no-run-cache
+        uv run dvc pull
 
     - name: Preprocess Data
       run: python src/proj/data.py data/raw data/processed
 
     - name: Check data statistics & generate report
       run: |
-        python src/proj/dataset_statistics.py > data_statistics.md
+        uv run python src/proj/dataset_statistics.py > data_statistics.md
         echo '![Train Dist](./train_label_distribution.png)' >> data_statistics.md
         echo '![Test Dist](./test_label_distribution.png)' >> data_statistics.md
         echo '![Spectrogram](./sample_spectrogram.png)' >> data_statistics.md
