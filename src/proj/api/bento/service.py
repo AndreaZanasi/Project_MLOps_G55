@@ -1,5 +1,4 @@
 import bentoml
-from proj.api.export_onnx import inference
 import onnxruntime as ort
 import numpy as np
 
@@ -9,6 +8,13 @@ class AudioService:
 
     def __init__(self) -> None:
         self.model_session = ort.InferenceSession("models/model.onnx")
+
+    def inference(self, ort_session: ort.InferenceSession, audio):
+        input_names = [i.name for i in ort_session.get_inputs()]
+        output_names = [o.name for o in ort_session.get_outputs()]
+        batch = {input_names[0]: audio.astype(np.float32)}
+        output = ort_session.run(output_names, batch)
+        return output[0]
 
     @bentoml.api(
         batchable=True,
@@ -20,7 +26,7 @@ class AudioService:
         audio_specs = np.asarray(audio_specs, dtype=np.float32)
         audio_specs = audio_specs[:, np.newaxis, :, :]
 
-        predictions = inference(self.model_session, audio_specs)
+        predictions = self.inference(self.model_session, audio_specs)
 
         results = []
         for i in range(predictions.shape[0]):

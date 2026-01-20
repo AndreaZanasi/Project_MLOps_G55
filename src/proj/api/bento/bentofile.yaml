@@ -4,6 +4,8 @@ labels:
   project: animal-sounds
 include:
   - '*.py'
+  - 'models/'
+
 python:
   packages:
     - torch

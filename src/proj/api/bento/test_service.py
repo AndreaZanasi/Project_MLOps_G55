@@ -2,6 +2,8 @@ import torch
 import numpy as np
 import requests
 
+#https://audio-service-685944380771.europe-west6.run.app
+
 GREEN = "\033[92m"
 RED = "\033[91m"
 RESET = "\033[0m"
@@ -11,7 +13,7 @@ spectrograms = data["spectrograms"].numpy()
 labels = data["labels"].numpy()
 num_samples = len(spectrograms)
 
-url = "http://127.0.0.1:3000/predict"
+url = "https://audio-service-685944380771.europe-west6.run.app/predict"
 total = 100
 
 batch_indices = np.random.choice(num_samples, total, replace=False)
