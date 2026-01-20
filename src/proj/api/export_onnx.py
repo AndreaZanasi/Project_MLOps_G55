@@ -5,17 +5,29 @@ from hydra import initialize, compose
 import numpy as np
 import onnxruntime as ort
 import subprocess
+import os
+
+import wandb
+api = wandb.Api()
+artifact = api.artifact(
+    "MLOps_G55/Project_MLOps_G55/species_recognition_model:v1",
+    type="model",
+)
+artifact_dir = artifact.download()
+
 
 SHAPE = (1, 64, 1168)
 
-def export_model(path, name):
+def export_model(path, name, weights_path):
     with initialize(config_path="../../../configs", version_base="1.1"):
         cfg = compose(config_name="model_cfg.yaml")
 
     model = Model(cfg)
-    dummy_input = torch.randn(2, *SHAPE)
-
+    state = torch.load(weights_path, map_location="cpu", weights_only=False)
+    model.load_state_dict(state["state_dict"])
     model.eval()
+
+    dummy_input = torch.randn(2, *SHAPE)
 
     with torch.no_grad():
         torch.onnx.export(
@@ -39,5 +51,7 @@ def inference(ort_session: ort.InferenceSession, audio):
     return output[0]
 
 if __name__ == "__main__":
-    export_model("models", "model.onnx")
+    print(os.listdir(artifact_dir))
+    checkpoint_path = os.path.join(artifact_dir, "model.ckpt")
+    export_model("models", "model.onnx", checkpoint_path)
     visualize_model("models/model.onnx")

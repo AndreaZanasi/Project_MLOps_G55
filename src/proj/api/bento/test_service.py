@@ -1,39 +1,38 @@
 import torch
-import requests
 import numpy as np
+import requests
+
+GREEN = "\033[92m"
+RED = "\033[91m"
+RESET = "\033[0m"
 
 data = torch.load("data/processed/test/test.pt", weights_only=False)
+spectrograms = data["spectrograms"].numpy()
+labels = data["labels"].numpy()
+num_samples = len(spectrograms)
+
 url = "http://127.0.0.1:3000/predict"
+total = 100
 
-audio_sample = data["spectrograms"][0].numpy()
-label = data["labels"][0].item()
+batch_indices = np.random.choice(num_samples, total, replace=False)
+batch_samples = spectrograms[batch_indices]
+batch_labels = labels[batch_indices]
 
-resp = requests.post(
-    url,
-    json={"audio_specs": audio_sample.tolist()},
-)
-print("Single sample output:", resp.json())
-print("Ground truth label:", label)
+correct = 0
 
-print("\n" + "="*50 + "\n")
-
-batch_samples = data["spectrograms"][:5].numpy()
-batch_labels = data["labels"][:5].numpy()
-
-batch_results = []
 for i, sample in enumerate(batch_samples):
-    resp = requests.post(
-        url,
-        json={"audio_specs": sample.tolist()},
-    )
-    
-    result = resp.json()
-    
+    response = requests.post(url, json={"audio_specs": sample.tolist()})
+    result = response.json()
     if isinstance(result, list):
         result = result[0]
-        
-    batch_results.append(result)
-    
-    print(f"Sample {i}: Predicted={result.get('prediction', 'error')}, True={batch_labels[i]}")
 
-print("\nBatch labels:", batch_labels.tolist())
+    pred = result.get("prediction", "error")
+
+    if pred == batch_labels[i]:
+        color = GREEN
+        correct = correct + 1
+    else: color = RED
+
+    print(f"Sample {i}: Predicted={color}{pred}{RESET}, True={batch_labels[i]}")
+
+print(f"Accuracy: {correct}/{total}")
