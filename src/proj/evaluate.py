@@ -8,13 +8,7 @@ from proj.data import MyDataset
 
 log = logging.getLogger(__name__)
 
-DEVICE = torch.device(
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
 
 def evaluate(
@@ -24,10 +18,10 @@ def evaluate(
     batch_size: int,
     log_wandb: bool,
     model_checkpoint: str | None = None,
-):  
+):
     if model_checkpoint:
         model.load_state_dict(torch.load(model_checkpoint, weights_only=False))
-        
+
     test_dataloader = torch.utils.data.DataLoader(dataset.test_set, batch_size, shuffle=True)
 
     model.eval()
@@ -48,6 +42,7 @@ def evaluate(
 
     return accuracy
 
+
 def main():
     with initialize(config_path="../../configs", version_base="1.1"):
         train_cfg = compose(config_name="train_cfg.yaml")
@@ -59,12 +54,8 @@ def main():
     ds = MyDataset(train_cfg.paths.data_dir)
     ds.preprocess(train_cfg.paths.output_dir)
 
-    evaluate(
-        model,
-        ds.test_set,
-        train_cfg.hyperparameters.batch_size,
-        train_cfg.paths.model_name
-    )
+    evaluate(model, ds.test_set, train_cfg.hyperparameters.batch_size, train_cfg.paths.model_name)
+
 
 if __name__ == "__main__":
     main()

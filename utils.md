@@ -4,4 +4,3 @@ To update the `requirements.txt` using `uv pip compile`, run the following comma
 ```bash
 uv pip compile pyproject.toml -o requirements.txt
 ```
-

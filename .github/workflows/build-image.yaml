@@ -2,7 +2,7 @@ name: Build Docker Image
 
 on:
   workflow_dispatch:
-  
+
   push:
     branches: [ "main" ]  # Only build when code is accepted into main
     paths:
@@ -44,5 +44,5 @@ jobs:
             -f dockerfiles/train_cpu.dockerfile \
             -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             .
-          
+
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
