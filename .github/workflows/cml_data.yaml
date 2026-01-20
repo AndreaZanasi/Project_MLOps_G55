@@ -32,7 +32,7 @@ jobs:
 
     - name: Pull data
       run: |
-        uv run dvc pull --no-run-cache
+        uv run dvc pull
 
     - name: Preprocess Data
       run: python src/proj/data.py data/raw data/processed
