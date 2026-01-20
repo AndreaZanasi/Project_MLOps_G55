@@ -8,6 +8,10 @@ on:
     - '.dvc/**'
     - 'dvc.lock'
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   dataset_statistics:
     runs-on: ubuntu-latest
