@@ -10,7 +10,7 @@ import os
 import wandb
 api = wandb.Api()
 artifact = api.artifact(
-    "MLOps_G55/Project_MLOps_G55/species_recognition_model:v1",
+    "MLOps_G55/Project_MLOps_G55/species_recognition_model:v0",
     type="model",
 )
 artifact_dir = artifact.download()
@@ -24,7 +24,7 @@ def export_model(path, name, weights_path):
 
     model = Model(cfg)
     state = torch.load(weights_path, map_location="cpu", weights_only=False)
-    model.load_state_dict(state["state_dict"])
+    model.load_state_dict(state)
     model.eval()
 
     dummy_input = torch.randn(2, *SHAPE)
@@ -52,6 +52,6 @@ def inference(ort_session: ort.InferenceSession, audio):
 
 if __name__ == "__main__":
     print(os.listdir(artifact_dir))
-    checkpoint_path = os.path.join(artifact_dir, "model.ckpt")
+    checkpoint_path = os.path.join(artifact_dir, "model.pth")
     export_model("models", "model.onnx", checkpoint_path)
     visualize_model("models/model.onnx")
