@@ -1,9 +1,7 @@
 import bentoml
 from proj.api.export_onnx import inference
 import onnxruntime as ort
-import librosa
 import numpy as np
-import numpy.typing as npt
 
 @bentoml.service(workers=4)
 class AudioService:

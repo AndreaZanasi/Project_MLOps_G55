@@ -31,7 +31,8 @@ for i, sample in enumerate(batch_samples):
     if pred == batch_labels[i]:
         color = GREEN
         correct = correct + 1
-    else: color = RED
+    else: 
+        color = RED
 
     print(f"Sample {i}: Predicted={color}{pred}{RESET}, True={batch_labels[i]}")
 
