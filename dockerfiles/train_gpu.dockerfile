@@ -20,4 +20,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY src/ src/
 COPY configs/ configs/
 
-ENTRYPOINT ["uv", "run", "src/proj/train.py"]
+ENTRYPOINT ["uv", "run", "src/proj/train_lightning.py"]

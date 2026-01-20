@@ -27,7 +27,9 @@ def load_model(artifact_path):
 
 
 def test_model_speed():
-    model_name = os.getenv("MODEL_NAME", "mlops_g55-org/wandb-registry-marine_mammal_registry/species_classifier:staging")
+    model_name = os.getenv(
+        "MODEL_NAME", "mlops_g55-org/wandb-registry-marine_mammal_registry/species_classifier:staging"
+    )
     model = load_model(model_name)
 
     start = time.time()
