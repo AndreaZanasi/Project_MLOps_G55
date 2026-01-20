@@ -13,8 +13,8 @@ def link_model(artifact_path: str, aliases: List[str] = ["staging"]) -> None:
 
     artifact = api.artifact(artifact_path)
 
-    entity = "MLOps_G55"
-    registry_name = "marine_mammal_registry"
+    entity = "mlops_g55-org"
+    registry_name = "wandb-registry-marine_mammal_registry"
     collection_name = "species_classifier"
 
     target_path = f"{entity}/{registry_name}/{collection_name}"

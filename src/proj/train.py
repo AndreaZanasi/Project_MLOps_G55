@@ -102,7 +102,7 @@ def train(
 @hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
 def main(cfg):
     if cfg.logging.log_wandb:
-        run = wandb.init(entity="MLOps_G55", project="Project_MLOps_G55", config=OmegaConf.to_object(cfg))
+        run = wandb.init(entity="mlops_g55-org", project="Project_MLOps_G55", config=OmegaConf.to_object(cfg))
     else:
         run = None
 

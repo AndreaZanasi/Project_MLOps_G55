@@ -43,7 +43,7 @@ def train_lightning(
 
     logger = None
     if log_wandb:
-        logger = WandbLogger(entity="MLOps_G55", project="Project_MLOps_G55", config=OmegaConf.to_object(train_cfg))
+        logger = WandbLogger(entity="mlops_g55-org", project="Project_MLOps_G55", config=OmegaConf.to_object(train_cfg))
 
     trainer = L.Trainer(
         max_epochs=max_epochs,
