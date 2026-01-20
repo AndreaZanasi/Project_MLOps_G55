@@ -10,6 +10,7 @@ from proj.data_module import AudioDataModule
 
 log = logging.getLogger(__name__)
 
+
 def train_lightning(
     model_cfg,
     train_cfg,
@@ -21,18 +22,15 @@ def train_lightning(
     log_wandb: bool = True,
     accelerator: str = "auto",
     devices: str | int = "auto",
-    data_module = None
+    data_module=None,
 ):
     if data_module is None:
         data_module = AudioDataModule(
             data_dir=data_dir, output_dir=output_dir, batch_size=batch_size, num_workers=4, val_split=0.2
         )
-    
-    model = LightningAudioClassifier(
-        cfg=model_cfg, 
-        learning_rate=learning_rate
-    )
-    
+
+    model = LightningAudioClassifier(cfg=model_cfg, learning_rate=learning_rate)
+
     checkpoint_callback = ModelCheckpoint(
         dirpath=train_cfg.paths.model_dir,
         filename="audio-classifier-{epoch:02d}-{val_acc:.4f}",
@@ -40,20 +38,12 @@ def train_lightning(
         mode="max",
         save_top_k=1,
     )
-    
-    early_stop_callback = EarlyStopping(
-        monitor="val_loss",
-        patience=5,
-        mode="min"
-    )
-    
+
+    early_stop_callback = EarlyStopping(monitor="val_loss", patience=5, mode="min")
+
     logger = None
     if log_wandb:
-        logger = WandbLogger(
-            entity="MLOps_G55",
-            project="Project_MLOps_G55",
-            config=OmegaConf.to_object(train_cfg)
-        )
+        logger = WandbLogger(entity="MLOps_G55", project="Project_MLOps_G55", config=OmegaConf.to_object(train_cfg))
 
     trainer = L.Trainer(
         max_epochs=max_epochs,
@@ -63,23 +53,24 @@ def train_lightning(
         devices=devices,
         log_every_n_steps=10,
     )
-    
+
     trainer.fit(model, data_module)
     trainer.test(model, data_module)
-    
+
     if log_wandb and checkpoint_callback.best_model_path:
         best_model_path = checkpoint_callback.best_model_path
         artifact = wandb.Artifact(
             name="species_recognition_model",
             type="model",
             description="A model trained to recognize species based on animal vocalizations",
-            metadata={"accuracy": float(checkpoint_callback.best_model_score)}
+            metadata={"accuracy": float(checkpoint_callback.best_model_score)},
         )
         artifact.add_file(best_model_path, name="model.ckpt")
         wandb.log_artifact(artifact)
         wandb.finish()
-    
+
     return trainer, model
+
 
 def main():
     with initialize(config_path="../../configs", version_base="1.1"):
@@ -96,8 +87,9 @@ def main():
         output_dir=train_cfg.paths.output_dir,
         batch_size=train_cfg.hyperparameters.batch_size,
         learning_rate=train_cfg.hyperparameters.get("learning_rate", 1e-3),
-        log_wandb=train_cfg.logging.log_wandb
+        log_wandb=train_cfg.logging.log_wandb,
     )
+
 
 if __name__ == "__main__":
     main()

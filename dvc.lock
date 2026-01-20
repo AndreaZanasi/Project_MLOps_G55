@@ -3,15 +3,15 @@ stages:
   prepare_data:
     cmd: python src/proj/data.py data/raw data/processed
     deps:
+    - path: data/raw
+      md5: de2ca80a696f4863761b407df46f2194.dir
+      size: 1333857363
+      nfiles: 7
     - path: src/proj/data.py
-      md5: fce22c1ffa3970a78cbc68ee04d8aa4e
-      size: 5031
+      md5: 9cdcbdb114065587ad195d7b3fbebe84
+      size: 5033
     outs:
     - path: data/processed
       md5: 9ec29808eef29a13f3dee0ba5ca056e6.dir
       size: 507432914
       nfiles: 2
-    - path: data/raw
-      md5: 11d3a14bc32ceead9b3cd62fa7094f2a.dir
-      size: 1333857355
-      nfiles: 6
