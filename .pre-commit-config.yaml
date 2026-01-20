@@ -14,7 +14,11 @@ repos:
       - id: ruff
         args: ["--fix"]
       - id: ruff-format
--   repo: https://github.com/pre-commit/mirrors-autopep8
-    rev: v2.0.4
+-   repo: local
     hooks:
-    -   id: autopep8
+    -   id: uv-compile-requirements
+        name: Compile requirements.txt from pyproject.toml
+        entry: uv pip compile pyproject.toml -o requirements.txt
+        language: system
+        files: pyproject.toml
+        pass_filenames: false
