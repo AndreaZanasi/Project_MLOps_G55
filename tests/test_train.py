@@ -1,47 +1,42 @@
-from proj.train import train
-from proj.model import Model
+from proj.train_lightning import train_lightning
 import torch
 import pytest
 from hydra import compose, initialize
+from unittest.mock import MagicMock
+from torch.utils.data import DataLoader
 from tests import SHAPE
 
-
 @pytest.fixture
-def setup_train():
+def setup_configs(tmp_path):
     """Setup for training tests."""
     with initialize(config_path="../configs", version_base="1.1"):
-        cfg = compose(config_name="hydra_cfg.yaml")
-    
-    model = Model(cfg)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    criterion = torch.nn.CrossEntropyLoss()
-    
-    return model, optimizer, criterion
+        train_cfg = compose(config_name="hydra_cfg.yaml", overrides=[
+            "logging.log_wandb=False",
+            f"paths.model_dir={str(tmp_path)}"
+        ])
+        model_cfg = compose(config_name="model_cfg.yaml")
+    return train_cfg, model_cfg
 
-def test_train_smoke(setup_train, tmp_path):
+def test_train_smoke(setup_configs):
     """Smoke test: verify training runs without crashing."""
-    model, optimizer, criterion = setup_train
+    train_cfg, model_cfg = setup_configs
     
-    audio = torch.randn(1, *SHAPE)
-    label = torch.tensor([0])
+    audio = torch.randn(2, *SHAPE)
+    label = torch.randint(0, 5, (2,))
     dataset = torch.utils.data.TensorDataset(audio, label)
     
-    from proj.data import MyDataset
-    mock_dataset = MyDataset("data/test/raw")
-    mock_dataset.preprocess("data/test/processed")
-    mock_dataset.train_set = dataset
-    mock_dataset.test_set = dataset
+    mock_dm = MagicMock()
+    loader = DataLoader(dataset, batch_size=2)
+    mock_dm.train_dataloader.return_value = loader
+    mock_dm.val_dataloader.return_value = loader
+    mock_dm.test_dataloader.return_value = loader
     
-    train(
-        optimizer,
-        criterion,
-        model,
-        None,
-        mock_dataset,
-        batch_size=1,
-        epochs=1,
-        figures_dir=str(tmp_path / "figures"),
-        model_dir=str(tmp_path / "models"),
-        model_name="test_model.pth",
+    train_lightning(
+        model_cfg=model_cfg,
+        train_cfg=train_cfg,
+        max_epochs=1,
+        data_module=mock_dm,
+        accelerator="cpu",
+        devices=1,
         log_wandb=False
     )
