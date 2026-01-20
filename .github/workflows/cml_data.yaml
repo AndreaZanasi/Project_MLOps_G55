@@ -1,6 +1,8 @@
 name: DVC Workflow
 
 on:
+  workflow_dispatch:
+  
   pull_request:
     branches: [ main, master, dev ]
     paths:
