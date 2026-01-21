@@ -43,13 +43,6 @@ def visualize_model(path):
     print("Starting Netron...")
     subprocess.Popen(["netron", path])
 
-def inference(ort_session: ort.InferenceSession, audio):
-    input_names = [i.name for i in ort_session.get_inputs()]
-    output_names = [o.name for o in ort_session.get_outputs()]
-    batch = {input_names[0]: audio.astype(np.float32)}
-    output = ort_session.run(output_names, batch)
-    return output[0]
-
 if __name__ == "__main__":
     print(os.listdir(artifact_dir))
     checkpoint_path = os.path.join(artifact_dir, "model.pth")
