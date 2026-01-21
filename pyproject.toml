@@ -77,3 +77,10 @@ omit = [
     "**/tmp*",
     "**/_remote_module_non_scriptable.py"
 ]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+

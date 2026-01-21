@@ -4,9 +4,7 @@ import time
 import torch
 import wandb
 from hydra import initialize, compose
-
-sys.path.append(os.getcwd())
-from src.proj.lightning_model import LightningAudioClassifier  # noqa: E402
+from proj.lightning_model import LightningAudioClassifier
 
 
 def load_model(artifact_path):
