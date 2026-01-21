@@ -14,7 +14,7 @@ jobs:
         run: |
           echo "Event type: repository_dispatch"
           echo "Payload Data: ${{ toJson(github.event.client_payload) }}"
-      
+
       - name: Set output
         id: set_output
         run: echo "model_name=${{ github.event.client_payload.artifact_version_string }}" >> $GITHUB_OUTPUT

@@ -19,5 +19,5 @@ paths:
   model_dir: models
   model_name: model.pth
 
-logging: 
+logging:
   log_wandb: true
