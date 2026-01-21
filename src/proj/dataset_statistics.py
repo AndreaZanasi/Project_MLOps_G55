@@ -8,7 +8,7 @@ def dataset_statistics(output_folder: str = "data/processed"):
     test_file = Path(f"{output_folder}/test/test.pt")
 
     if not train_file.exists():
-        print(f"Dataset not preprocessed. Call preprocess() first.")
+        print("Dataset not preprocessed. Call preprocess() first.")
         return
 
     train_data = torch.load(train_file, weights_only=True)

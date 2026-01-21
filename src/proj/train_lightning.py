@@ -1,12 +1,10 @@
 import lightning as L
 from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
 from lightning.pytorch.loggers import WandbLogger
-import hydra
 from omegaconf import OmegaConf
 from hydra import initialize, compose
 import logging
 import wandb
-from pathlib import Path
 from proj.lightning_model import LightningAudioClassifier
 from proj.data_module import AudioDataModule
 
@@ -20,11 +18,15 @@ def train_lightning(
     output_dir: str = "data/processed",
     batch_size: int = 32,
     learning_rate: float = 1e-3,
-    log_wandb: bool = True
+    log_wandb: bool = True,
+    accelerator: str = "auto",
+    devices: str | int = "auto",
+    data_module = None
 ):
-    data_module = AudioDataModule(
-        data_dir=data_dir, output_dir=output_dir, batch_size=batch_size, num_workers=4, val_split=0.2
-    )
+    if data_module is None:
+        data_module = AudioDataModule(
+            data_dir=data_dir, output_dir=output_dir, batch_size=batch_size, num_workers=4, val_split=0.2
+        )
     
     model = LightningAudioClassifier(
         cfg=model_cfg, 
@@ -57,8 +59,8 @@ def train_lightning(
         max_epochs=max_epochs,
         callbacks=[checkpoint_callback, early_stop_callback],
         logger=logger,
-        accelerator="auto",
-        devices="auto",
+        accelerator=accelerator,
+        devices=devices,
         log_every_n_steps=10,
     )
     
