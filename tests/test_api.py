@@ -2,12 +2,15 @@ import torch
 import numpy as np
 import requests
 import pytest
+from src.proj.data import MyDataset, preprocess
 
 URL = "https://audio-service-685944380771.europe-west6.run.app/predict"
 N_SAMPLES = 10
 
 @pytest.fixture(scope="module")
 def test_data():
+    ds = MyDataset("data/raw")
+    ds.preprocess("data/processed/test")
     data = torch.load("data/processed/test/test.pt", weights_only=False)
     spectrograms = data["spectrograms"].numpy()
     labels = data["labels"].numpy()
