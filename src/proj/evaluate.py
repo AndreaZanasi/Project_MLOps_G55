@@ -22,6 +22,7 @@ def evaluate(
     if model_checkpoint:
         model.load_state_dict(torch.load(model_checkpoint, weights_only=False))
 
+    model.to(DEVICE)
     test_dataloader = torch.utils.data.DataLoader(dataset.test_set, batch_size, shuffle=True)
 
     model.eval()
@@ -49,7 +50,6 @@ def main():
         model_cfg = compose(config_name="model_cfg.yaml")
 
     model = Model(model_cfg)
-    model.to(DEVICE)
 
     ds = MyDataset(train_cfg.paths.data_dir)
     ds.preprocess(train_cfg.paths.output_dir)
