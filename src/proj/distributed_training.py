@@ -108,6 +108,7 @@ def main(cfg):
 
     parser = ArgumentParser("DDP")
     parser.add_argument("--local_rank", type=int, default=-1, metavar="N", help="Local process rank.")
+    parser.add_argument("--n_workers", type=int, default=4, help="To make the dataloader distributed")
     args = parser.parse_args()
 
     args.is_master = args.local_rank == 0
@@ -125,7 +126,7 @@ def main(cfg):
     dataset.preprocess(cfg.paths.output_dir)
 
     sampler = DistributedSampler(dataset.train_set)
-    dataloader = DataLoader(dataset=dataset.train_set, sampler=sampler, batch_size=cfg.hyperparameters.batch_size)
+    dataloader = DataLoader(dataset=dataset.train_set, sampler=sampler, batch_size=cfg.hyperparameters.batch_size, num_workers=args.n_workers)
 
     train(
         hydra.utils.instantiate(cfg.optimizer, params=model.parameters()),
