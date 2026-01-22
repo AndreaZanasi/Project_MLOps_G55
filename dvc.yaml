@@ -3,6 +3,6 @@ stages:
     cmd: python src/proj/data.py data/raw data/processed
     deps:
     - src/proj/data.py
+    - data/raw
     outs:
     - data/processed
-    - data/raw

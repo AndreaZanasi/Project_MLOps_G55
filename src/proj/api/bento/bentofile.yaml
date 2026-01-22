@@ -1,0 +1,14 @@
+service: 'service:AudioService'
+labels:
+  owner: andreazanasi
+  project: animal-sounds
+include:
+  - '*.py'
+  - 'models/'
+
+python:
+  packages:
+    - torch
+    - onnxruntime
+    - librosa
+    - numpy

@@ -1,12 +1,19 @@
 name: DVC Workflow
 
 on:
+  workflow_dispatch:
+  
   pull_request:
     branches: [ main, master, dev ]
     paths:
     - '**/*.dvc'
     - '.dvc/**'
-    
+    - 'dvc.lock'
+
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   dataset_statistics:
     runs-on: ubuntu-latest
@@ -17,11 +24,11 @@ jobs:
     - name: Setup uv
       uses: astral-sh/setup-uv@v7
       with:
-        enable-cache: true 
+        enable-cache: true
         python-version: "3.12"
 
     - name: Install dependencies
-      run: uv sync --dev --locked 
+      run: uv sync --dev --locked
 
     - name: Auth with GCP
       uses: google-github-actions/auth@v2
@@ -30,14 +37,14 @@ jobs:
 
     - name: Pull data
       run: |
-        uv run dvc pull --no-run-cache
+        uv run dvc pull
 
     - name: Preprocess Data
-      run: python src/proj/data.py data/raw data/processed
+      run: uv run python src/proj/data.py data/raw data/processed
 
     - name: Check data statistics & generate report
       run: |
-        python src/proj/dataset_statistics.py > data_statistics.md
+        uv run python src/proj/dataset_statistics.py > data_statistics.md
         echo '![Train Dist](./train_label_distribution.png)' >> data_statistics.md
         echo '![Test Dist](./test_label_distribution.png)' >> data_statistics.md
         echo '![Spectrogram](./sample_spectrogram.png)' >> data_statistics.md
