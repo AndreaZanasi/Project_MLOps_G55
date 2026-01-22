@@ -24,7 +24,6 @@ class TestClass:
                 assert audio.shape == SHAPE, f"Expected shape: {SHAPE}"
                 assert labels in range(N_CLASSES), f"Expected number of classes: {N_CLASSES}"
 
-
     def test_my_dataset_methods(self):
         """Test the methods of MyDataset class."""
         dataset = MyDataset("data/raw")

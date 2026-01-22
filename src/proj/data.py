@@ -10,6 +10,7 @@ from datasets import load_dataset
 
 log = logging.getLogger(__name__)
 
+
 class MyDataset(Dataset):
     """My custom dataset."""
 
@@ -58,13 +59,13 @@ class MyDataset(Dataset):
         n_fft = 1024
         hop_length = 320
 
-        #This value was computed based on the average length of the audio files
+        # Based on the average length of the audio files
         target_length = 1168
 
         spectrograms = []
         labels = []
 
-        for idx, sample in enumerate(dataset):
+        for _, sample in enumerate(dataset):
             audio = sample["audio"]
             waveform = np.array(audio["array"], dtype=np.float32)
             original_sr = audio["sampling_rate"]
@@ -84,10 +85,10 @@ class MyDataset(Dataset):
 
             mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
 
-            #Pad/Truncate data since every file must be of the same length
+            # Pad/Truncate data since every file must be of the same length
             if mel_spec_db.shape[1] < target_length:
                 pad_width = target_length - mel_spec_db.shape[1]
-                mel_spec_db = np.pad(mel_spec_db, ((0, 0), (0, pad_width)), mode='constant', constant_values=-80.0)
+                mel_spec_db = np.pad(mel_spec_db, ((0, 0), (0, pad_width)), mode="constant", constant_values=-80.0)
             else:
                 mel_spec_db = mel_spec_db[:, :target_length]
 
@@ -104,7 +105,6 @@ class MyDataset(Dataset):
 
         tensor_dataset = TensorDataset(spectrograms, labels)
         return tensor_dataset
-
 
     def make_dataset(self) -> None:
         """Download all animal sound datasets across all configs and splits."""
