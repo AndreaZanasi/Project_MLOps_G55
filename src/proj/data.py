@@ -59,13 +59,13 @@ class MyDataset(Dataset):
         n_fft = 1024
         hop_length = 320
 
-        # This value was computed based on the average length of the audio files
+        # Based on the average length of the audio files
         target_length = 1168
 
         spectrograms = []
         labels = []
 
-        for idx, sample in enumerate(dataset):
+        for _, sample in enumerate(dataset):
             audio = sample["audio"]
             waveform = np.array(audio["array"], dtype=np.float32)
             original_sr = audio["sampling_rate"]
