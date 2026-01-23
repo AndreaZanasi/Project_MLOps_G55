@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 def load_model(cfg: DictConfig, model_path: Path) -> nn.Module:
     """Instantiates the model and loads weights from the provided path."""
-    log.info(f"Loading model architecture...")
+    log.info("Loading model architecture...")
     model = Model(cfg)
     
     log.info(f"Loading state dict from {model_path}")

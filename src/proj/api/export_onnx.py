@@ -2,8 +2,6 @@ from proj.model import Model
 
 import torch
 from hydra import initialize, compose
-import numpy as np
-import onnxruntime as ort
 import subprocess
 import os
 
