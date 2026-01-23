@@ -12,7 +12,6 @@ The objective of this project is to classify animal vocalizations. By utilizing 
 - **Weights & Biases (wandb)**: Experiment tracking and logging platform
 - **uv**: Fast Python package manager for dependency management
 - **Hydra**: Configuration management framework for composing and overriding configs dynamically
-- **Torch Profiler**: Performance analysis tool for profiling PyTorch models and identifying bottlenecks
 - **Ruff**: Fast Python linter and code formatter for maintaining code quality and consistency
 
 
