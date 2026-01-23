@@ -167,7 +167,7 @@ No.
 >
 > Answer:
 
-We used `uv` package manager to handle depedencies. Each team member had to sync its virtual environment using `uv sync` and updating the `project.toml` and `requirements.txt` files when required. 
+We managed dependencies using `uv` and a `pyproject.toml` file, which serves as the single source of truth for both production and development packages (adhering to PEP 621). For reproducibility across all environments, we committed a `uv.lock` file that pins every dependency to a specific version. For development, a new team member simply clones the repository and runs `uv sync`, which automatically creates and populates a virtual environment identical to the rest of the team's. This strategy extends also to our Docker setup. Our Dockerfiles utilize the official `ghcr.io/astral-sh/uv` base image and execute `uv sync --locked --no-dev`. So, the containerized application runs with the exact same dependency versions as our local development setups, preventing "it works on my machine" issues and simplifying the transition from local coding to cloud deployment. 
 
 ### Question 5
 
@@ -264,7 +264,7 @@ We used feature branches and pull requests for all non-trivial changes. Each new
 >
 > Answer:
 
---- question 10 fill here ---
+Yes, we utilized DVC to manage our project's data. We configured a Google Cloud Storage bucket (`gs://data-bucket-mlops52`) as our remote backend, which allowed us to version control ~1.8GB of data while keeping our Git repository lightweight. DVC improved our project by making sure that we all worked with the same data version and by decoupling code development from data management. It also was handy when working on Vertex AI (on GCP), as it allowed us to pull the data from the bucket and use it for training without having to push it inside the docker container.
 
 ### Question 11
 
@@ -379,7 +379,7 @@ We debugged primarily with targeted unit tests, extensive logging, and interacti
 >
 > Answer:
 
---- question 17 fill here ---
+We utilized the Google Cloud Platform ecosystem to support our MLOps pipeline in a lot of different steps. We used Cloud Storage (Buckets) as the backend for DVC to store our datasets and training artifacts. For container management, Artifact Registry was the central repository for hosting and versioning the Docker images used in training and inference. To automate our build process in a CI/CD pipeline, we used Cloud Build, which triggered image builds automatically upon changes. We used Vertex AI to execute our training jobs in the cloud. Finally, for deployment, we hosted our inference API on a serverless environment provided by Cloud Run.
 
 ### Question 18
 
@@ -394,7 +394,7 @@ We debugged primarily with targeted unit tests, extensive logging, and interacti
 >
 > Answer:
 
---- question 18 fill here ---
+We use the Compute Engine only through managed services rather than managing raw VMs manually. For training on Vertex AI, we used Custom Training Jobs that spun up Compute Engine instances on demand. For deployment, Cloud Run abstracted the underlying Compute Engine instances, which resulted in a serverless execution environment that automatically scaled container instances (using vCPU and RAM configurations defined in our `bentofile.yaml`/deployment config) based on incoming request traffic. However, we did not use Compute Engine instances directly for training or inference.
 
 ### Question 19
 
@@ -403,7 +403,8 @@ We debugged primarily with targeted unit tests, extensive logging, and interacti
 >
 > Answer:
 
---- question 19 fill here ---
+![bucket](figures/bucket.png)
+![data in bucket](figures/bucket_data.png)
 
 ### Question 20
 
@@ -412,7 +413,8 @@ We debugged primarily with targeted unit tests, extensive logging, and interacti
 >
 > Answer:
 
---- question 20 fill here ---
+![repositories](figures/repositories.png)
+![example_bentoml](figures/example_bentoml.png)
 
 ### Question 21
 
@@ -421,7 +423,7 @@ We debugged primarily with targeted unit tests, extensive logging, and interacti
 >
 > Answer:
 
---- question 21 fill here ---
+![build](figures/build.png)
 
 ### Question 22
 
@@ -436,7 +438,7 @@ We debugged primarily with targeted unit tests, extensive logging, and interacti
 >
 > Answer:
 
---- question 22 fill here ---
+We containerized the PyTorch training code using Docker, used uv for dependency management and DVC to fetch data from Google Cloud Storage (GCS) at runtime. We used Google Cloud Build to compile the image directly in the cloud and push it to Artifact Registry. Finally, we submitted a Vertex AI Custom Job to provision the compute infrastructure. We chose Vertex AI as it is the latest, most robust machine learning platform on GCP.
 
 ## Deployment
 
@@ -501,7 +503,7 @@ Unit testing is done with pytest (tests/test_api.py). The test suite loads real 
 >
 > Answer:
 
---- question 26 fill here ---
+We utilized the standard Google Cloud Monitoring that comes out-of-the-box with Cloud Run. This gave us immediate visibility into system-level metrics such as request latency, 5xx error rates, request counts, and container instance CPU/memory utilization. However, this approach is limited because it only measures system health, not model health. It cannot detect issues like data drift, model degradation, or model-serving skew since it lacks awareness of the model's inputs and outputs. To improve this, we would need to implement custom metrics logging or integrate a specialized ML monitoring tool.
 
 ## Overall discussion of project
 
@@ -520,7 +522,7 @@ Unit testing is done with pytest (tests/test_api.py). The test suite loads real 
 >
 > Answer:
 
---- question 27 fill here ---
+In total, we used slightly above 7 DKK. The service that cost the most was definitely Vertex AI training, as the data was relatively lightweight (so cheap to host) and we didn't have many docker images on the cloud. In general we liked working with the cloud, it made most things easier, although some arguabily harder due to the general lack of depth of this project. We however don't doubt that in bigger and more complex workflows, the amount of time spent debugging some issues on the cloud is much lower than working fully locally. Finance-wise, we expected it to be much more expensive than it actually is, and some of us think of actually using it privately from now on in personal projects.
 
 ### Question 28
 
@@ -595,4 +597,6 @@ Student s252979 — set up the repository environment using Cookiecutter and uv;
 
 Student s253128 — implemented the data module, Lightning model, and training scripts for the Lightning framework; wrote unit tests; authored documentation describing project modules; and created a script to generate requirements.txt from pyproject.toml.
 
-Use of AI tools: GitHub Copilot for code suggestions and for debugging assistance.
+Student s243076 - generally worked on all the GCP related tasks, so setting up the GCP environment, setting up the CI integration to push Docker images to Artifact Registry, setting up the Cloud Run service, setting up the Cloud Storage bucket, setting up the Cloud Monitoring and Cloud Logging, setting up Vertex AI for model training and deployment, and setting up the BentoML service on the Cloud Run service. Also setup all DVC related tasks, so setting up the DVC environment, setting up the DVC pipeline, and setting up the DVC remote. Finally did some of the faster tasks such as pre-commit setup and the inference speed up script.
+
+Use of AI tools: GitHub Copilot for code suggestions and for debugging assistance. Google Antigravity (s243076) for code completion and general assistance.
