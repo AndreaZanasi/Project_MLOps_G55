@@ -2,6 +2,7 @@ import bentoml
 import onnxruntime as ort
 import numpy as np
 
+
 @bentoml.service(workers=4)
 class AudioService:
     """Model service for classification"""

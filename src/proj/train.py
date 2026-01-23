@@ -27,7 +27,7 @@ def train(
     model_dir: str = "models",
     model_name: str = "model.pth",
     log_wandb: bool = True,
-    n_workers: int = 4
+    n_workers: int = 4,
 ):
     train_dataloader = torch.utils.data.DataLoader(dataset.train_set, batch_size, shuffle=True, num_workers=n_workers)
 

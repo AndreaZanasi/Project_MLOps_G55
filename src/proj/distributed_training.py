@@ -17,18 +17,19 @@ import matplotlib.pyplot as plt
 SEED = 42
 log = logging.getLogger(__name__)
 
+
 def train(
-        optimizer,
-        criterion,
-        device,
-        model: Model,
-        run: wandb.Run | None,
-        dataloader: DataLoader,
-        epochs: int = 10,
-        figures_dir: str = "reports/figures",
-        model_dir: str = "models",
-        model_name: str = "model.pth",
-        log_wandb: bool = True,
+    optimizer,
+    criterion,
+    device,
+    model: Model,
+    run: wandb.Run | None,
+    dataloader: DataLoader,
+    epochs: int = 10,
+    figures_dir: str = "reports/figures",
+    model_dir: str = "models",
+    model_name: str = "model.pth",
+    log_wandb: bool = True,
 ):
     statistics = {"loss": [], "accuracy": []}
 
@@ -56,7 +57,7 @@ def train(
             epoch_loss += loss.item() * label.size(0)
             epoch_correct += (prediction.argmax(dim=1) == label).sum().item()
             epoch_total += label.size(0)
-        
+
         stats_tensor = torch.tensor([epoch_loss, epoch_correct, epoch_total], device=device, dtype=torch.float64)
         dist.all_reduce(stats_tensor, op=dist.ReduceOp.SUM)
         global_loss = stats_tensor[0].item() / stats_tensor[2].item()
@@ -66,7 +67,7 @@ def train(
         statistics["accuracy"].append(global_accuracy)
 
         if log_wandb:
-            run.log({"train_loss": loss, "train_accuracy" : global_accuracy})
+            run.log({"train_loss": loss, "train_accuracy": global_accuracy})
         log.info(f"Epoch: {e} | Loss: {loss:.4f} | Train accuracy: {global_accuracy:.4f}")
         torch.save(model.state_dict(), model_name)
 
@@ -91,17 +92,14 @@ def train(
         run.log({"training_statistics": wandb.Image(fig)})
         run.finish()
 
+
 @hydra.main(config_path="../../configs", config_name="hydra_cfg.yaml", version_base="1.1")
 def main(cfg):
     """Script for distributed data training"""
 
     if cfg.logging.log_wandb:
-        run = wandb.init(
-            entity="MLOps_G55",
-            project="Project_MLOps_G55",
-            config=OmegaConf.to_object(cfg)
-        )
-    else: 
+        run = wandb.init(entity="MLOps_G55", project="Project_MLOps_G55", config=OmegaConf.to_object(cfg))
+    else:
         run = None
 
     log.info("Configuration:")
@@ -127,7 +125,12 @@ def main(cfg):
     dataset.preprocess(cfg.paths.output_dir)
 
     sampler = DistributedSampler(dataset.train_set)
-    dataloader = DataLoader(dataset=dataset.train_set, sampler=sampler, batch_size=cfg.hyperparameters.batch_size, num_workers=args.n_workers)
+    dataloader = DataLoader(
+        dataset=dataset.train_set,
+        sampler=sampler,
+        batch_size=cfg.hyperparameters.batch_size,
+        num_workers=args.n_workers,
+    )
 
     train(
         hydra.utils.instantiate(cfg.optimizer, params=model.parameters()),
@@ -140,5 +143,5 @@ def main(cfg):
         cfg.paths.figures_dir,
         cfg.paths.model_dir,
         cfg.paths.model_name,
-        cfg.logging.log_wandb
+        cfg.logging.log_wandb,
     )
