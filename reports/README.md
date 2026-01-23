@@ -347,7 +347,13 @@ We made use of config files in `configs/` folder. First, Hydra automatically sav
 >
 > Answer:
 
---- question 15 fill here ---
+We utilized Docker to containerize our training and inference environments, which allowed for consistency across local development and cloud execution. We created multiple Dockerfiles for different purposes: `train_cpu.dockerfile` for local testing on CPU, `train_gpu.dockerfile` for GPU-accelerated training, and `vertex_train.dockerfile` specifically for running training jobs on Google Cloud Vertex AI. The Vertex AI image extends the official NVIDIA PyTorch image, installs `uv` for dependency management, and configures DVC to pull data dynamically at runtime. This separation allows us to keep the image lightweight while ensuring the exact data and code versions are used.
+To build and run the local training image, we use:
+```bash
+docker build -f dockerfiles/train_cpu.dockerfile -t train_cpu:latest .
+docker run --rm train_cpu:latest
+```
+Link to docker file: [dockerfiles/train_cpu.dockerfile](dockerfiles/train_cpu.dockerfile)
 
 ### Question 16
 
