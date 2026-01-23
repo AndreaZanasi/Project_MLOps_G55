@@ -332,7 +332,19 @@ We made use of config files in `configs/` folder. First, Hydra automatically sav
 >
 > Answer:
 
-![wandb_charts](figures/wandb_charts.png). ![wandb_logs](figures/wandb_logs.png). W&B's centralized logging system enables easy comparison across multiple experimental runs, facilitating hyperparameter optimization and model selection. The logged artifacts and configurations are essential for reproducibility and model deployment, as we can retrieve the exact model version and settings that produced the best results.
+![wandb_charts](figures/wandb_charts.png) ![wandb_logs](figures/wandb_logs.png)
+We log scalar metrics (train_loss, train_accuracy, val_loss, val_accuracy), optimizer state (learning_rate), and epoch-level summaries for every run. These scalars let us monitor convergence, detect overfitting (val vs train divergence), and compare runs across hyperparameter settings. We also save and version model checkpoints and artifacts (ONNX and PyTorch checkpoints) in W&B so the exact model associated with any metric trace can be retrieved for reproduction and deployment.
+
+Hyperparameter sweep metadata (learning rate, batch size, augmentation flags) is recorded to correlate configuration with performance and to automate best-run selection. The logs screenshot shows epoch-level textual logs and checkpoint saves (validation accuracy appended to filenames), while the charts screenshot illustrates typical loss decrease and accuracy increase over 30 epochs.
+
+Tracking these metrics is important because:
+- train/val loss and accuracy inform model fit and generalization.
+- learning rate traces help diagnose optimization issues.
+- per-class confusion matrices guide targeted data augmentation or class re-balancing.
+- artifact/versioning ensures reproducibility and simplifies deployment of the best model.
+
+Together these logs enable principled hyperparameter search, early stopping decisions, and reproducible handoff to deployment.
+
 
 ### Question 15
 
@@ -347,7 +359,13 @@ We made use of config files in `configs/` folder. First, Hydra automatically sav
 >
 > Answer:
 
---- question 15 fill here ---
+We utilized Docker to containerize our training and inference environments, which allowed for consistency across local development and cloud execution. We created multiple Dockerfiles for different purposes: `train_cpu.dockerfile` for local testing on CPU, `train_gpu.dockerfile` for GPU-accelerated training, and `vertex_train.dockerfile` specifically for running training jobs on Google Cloud Vertex AI. The Vertex AI image extends the official NVIDIA PyTorch image, installs `uv` for dependency management, and configures DVC to pull data dynamically at runtime. This separation allows us to keep the image lightweight while ensuring the exact data and code versions are used.
+To build and run the local training image, we use:
+```bash
+docker build -f dockerfiles/train_cpu.dockerfile -t train_cpu:latest .
+docker run --rm train_cpu:latest
+```
+Link to docker file: [dockerfiles/train_cpu.dockerfile](dockerfiles/train_cpu.dockerfile)
 
 ### Question 16
 
@@ -488,7 +506,7 @@ or from Python: requests.post(URL, json={"audio_specs": array}).
 >
 > Answer:
 
-Unit testing is done with pytest (tests/test_api.py). The test suite loads real spectrogram samples from data/processed/test/test.pt via a module-scoped fixture, samples N_SAMPLES entries, and parameterizes requests so each sample is POSTed to the deployed /predict endpoint. Assertions check HTTP 200, presence of a "prediction" field and that the value is not an error. This verifies the end-to-end behavior (input serialization, model loading in the Bento/ONNX service, and response schema) against our Cloud Run endpoint. For load testing we would use Locust and collect metrics via GCP Cloud Monitoring.
+Unit testing is done with pytest (tests/test_api.py). The test uses dummy input of the correct shape,it makes N_SAMPLES samples, and parameterizes requests so each sample is POSTed to the deployed /predict endpoint. Assertions check HTTP 200, presence of a "prediction" field and that the value is not an error. This verifies the end-to-end behavior (input serialization, model loading in the Bento/ONNX service, and response schema) against our Cloud Run endpoint. For load testing we would use Locust and collect metrics via GCP Cloud Monitoring.
 
 ### Question 26
 
@@ -556,6 +574,8 @@ No.
 > Answer:
 
 The starting point of our architecture is our local setup, where we integrated Hydra for configuration management, PyTorch Lightning for streamlined training, and Weights & Biases for experiment tracking. The main framework we used are PyTorch for deep learning, librosa for audio signal processing, and Hugging Face Datasets for efficient data loading. Code quality is enforced through Ruff linting and formatting with pre-commit hooks, and dependencies are managed with `uv`. Unit testing is performed with pytest. When we commit code and push to GitHub's main or dev branches, it auto triggers multiple CI/CD workflows: tests.yaml runs pytest tests across multiple OS (Windows, Ubuntu) with dependency caching, while codecheck.yaml performs linting checks using Ruff. The cml_data.yaml workflow pulls data from GCP and generates dataset statistics such as audio class distributions and spectrograms. Only when changes are pushed to the main branch, build-image.yaml is triggered, which automatically builds Docker images and pushes them to Google Cloud Artifact Registry. From the artifact registry, the images are pulled by Google Cloud Build and Vertex AI for distributed training on the cloud. During training, metrics and model artifacts are logged to Weights & Biases for monitoring and comparison. Additionally, when we add the alias "staging" to a model in W&B, the stage_model.yaml workflow is triggered via repository dispatch, which automatically runs performance tests on the staged model and adds production aliases if tests pass. After successful training and validation, the best model is converted to ONNX format and deployed to Google Cloud Run as a containerized BentoML service. The API endpoints accept audio spectrograms and return species predictions. Input and output data from the deployed API is also collected for monitoring. We use DVC to manage our data versioning, storing raw and processed datasets in Google Cloud Storage, whereas checkpoints and trained models are versioned in the artifact registry. This pipeline ensures reproducibility, automated testing, continuous deployment, and scalable training across the entire MLOps workflow.
+![diagram](figures/diagram.jpg) 
+
 
 ### Question 30
 
@@ -599,6 +619,6 @@ Student s253128 — implemented the data module, Lightning model, and training s
 
 Student s243076 - generally worked on all the GCP related tasks, so setting up the GCP environment, setting up the CI integration to push Docker images to Artifact Registry, setting up the Cloud Run service, setting up the Cloud Storage bucket, setting up the Cloud Monitoring and Cloud Logging, setting up Vertex AI for model training and deployment, and setting up the BentoML service on the Cloud Run service. Also setup all DVC related tasks, so setting up the DVC environment, setting up the DVC pipeline, and setting up the DVC remote. Finally did some of the faster tasks such as pre-commit setup and the inference speed up script.
 
-Student s253462 — Constructed and tested the local Dockerfiles for the environment; wrote unit tests; contributed to the creation of the lightning model; implemented dataset statistic, performance test and model link scripts; designed and implemented the main CI workflows in GitHub Actions, including caching, multi-OS testing, automated linting and the workflows for data change triggers (CML) and model registry staging triggers. Designed and created the architectural overview of the project using draw.io
+Student s253462 - Constructed and tested the local Dockerfiles for the environment; wrote unit tests; contributed to the creation of the lightning model; implemented dataset statistic, performance test and model link scripts; designed and implemented the main CI workflows in GitHub Actions, including caching, multi-OS testing, automated linting and the workflows for data change triggers (CML) and model registry staging triggers. Designed and created the architectural overview of the project using draw.io
 
 Use of AI tools: GitHub Copilot for code suggestions, debugging assistance and report grammar/typos check. Google Antigravity (s243076) for code completion and general assistance and report grammar/typos check.
