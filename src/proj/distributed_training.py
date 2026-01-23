@@ -101,7 +101,8 @@ def main(cfg):
             project="Project_MLOps_G55",
             config=OmegaConf.to_object(cfg)
         )
-    else: run = None
+    else: 
+        run = None
 
     log.info("Configuration:")
     log.info(OmegaConf.to_yaml(cfg))
