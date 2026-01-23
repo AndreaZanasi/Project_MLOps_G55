@@ -1,21 +1,18 @@
-import torch
 import numpy as np
 import requests
 import pytest
+from tests import SHAPE
 
 URL = "https://audio-service-685944380771.europe-west6.run.app/predict"
 N_SAMPLES = 10
 
 @pytest.fixture(scope="module")
 def test_data():
-    data = torch.load("data/processed/test/test.pt", weights_only=False)
-    spectrograms = data["spectrograms"].numpy()
-    labels = data["labels"].numpy()
-    num_samples = len(spectrograms)
-    batch_indices = np.random.choice(num_samples, N_SAMPLES, replace=False)
-    batch_samples = spectrograms[batch_indices]
-    batch_labels = labels[batch_indices]
-    return batch_samples, batch_labels
+    rng = np.random.default_rng(42)
+    num_samples = N_SAMPLES
+    spectrograms = rng.normal(size=(num_samples, *SHAPE)).astype(float)
+    labels = rng.integers(low=0, high=10, size=(num_samples,))
+    return spectrograms, labels
 
 @pytest.mark.parametrize("idx", range(N_SAMPLES))
 def test_predict_response_no_error(test_data, idx):
