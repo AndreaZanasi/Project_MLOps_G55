@@ -6,6 +6,7 @@ from tests import SHAPE
 URL = "https://audio-service-685944380771.europe-west6.run.app/predict"
 N_SAMPLES = 10
 
+
 @pytest.fixture(scope="module")
 def test_data():
     rng = np.random.default_rng(42)
@@ -13,6 +14,7 @@ def test_data():
     spectrograms = rng.normal(size=(num_samples, *SHAPE)).astype(float)
     labels = rng.integers(low=0, high=10, size=(num_samples,))
     return spectrograms, labels
+
 
 @pytest.mark.parametrize("idx", range(N_SAMPLES))
 def test_predict_response_no_error(test_data, idx):

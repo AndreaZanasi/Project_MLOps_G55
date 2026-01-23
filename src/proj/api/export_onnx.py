@@ -6,6 +6,7 @@ import subprocess
 import os
 
 import wandb
+
 api = wandb.Api()
 artifact = api.artifact(
     "MLOps_G55/Project_MLOps_G55/species_recognition_model:v0",
@@ -15,6 +16,7 @@ artifact_dir = artifact.download()
 
 
 SHAPE = (1, 64, 1168)
+
 
 def export_model(path, name, weights_path):
     with initialize(config_path="../../../configs", version_base="1.1"):
@@ -34,12 +36,14 @@ def export_model(path, name, weights_path):
             f=f"{path}/{name}",
             input_names=["input"],
             output_names=["output"],
-            dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}
+            dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}},
         )
+
 
 def visualize_model(path):
     print("Starting Netron...")
     subprocess.Popen(["netron", path])
+
 
 if __name__ == "__main__":
     print(os.listdir(artifact_dir))
