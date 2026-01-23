@@ -332,7 +332,19 @@ We made use of config files in `configs/` folder. First, Hydra automatically sav
 >
 > Answer:
 
-![wandb_charts](figures/wandb_charts.png). ![wandb_logs](figures/wandb_logs.png). W&B's centralized logging system enables easy comparison across multiple experimental runs, facilitating hyperparameter optimization and model selection. The logged artifacts and configurations are essential for reproducibility and model deployment, as we can retrieve the exact model version and settings that produced the best results.
+![wandb_charts](figures/wandb_charts.png) ![wandb_logs](figures/wandb_logs.png)
+We log scalar metrics (train_loss, train_accuracy, val_loss, val_accuracy), optimizer state (learning_rate), and epoch-level summaries for every run. These scalars let us monitor convergence, detect overfitting (val vs train divergence), and compare runs across hyperparameter settings. We also save and version model checkpoints and artifacts (ONNX and PyTorch checkpoints) in W&B so the exact model associated with any metric trace can be retrieved for reproduction and deployment.
+
+In addition to scalars, we log example inputs/outputs (spectrogram images and per-sample predictions) and confusion matrices to inspect class-wise errors and systematic failure modes. Hyperparameter sweep metadata (learning rate, batch size, augmentation flags) is recorded to correlate configuration with performance and to automate best-run selection. The logs screenshot shows epoch-level textual logs and checkpoint saves (validation accuracy appended to filenames), while the charts screenshot illustrates typical loss decrease and accuracy increase over 30 epochs.
+
+Tracking these metrics is important because:
+- train/val loss and accuracy inform model fit and generalization.
+- learning rate traces help diagnose optimization issues.
+- per-class confusion matrices guide targeted data augmentation or class re-balancing.
+- artifact/versioning ensures reproducibility and simplifies deployment of the best model.
+
+Together these logs enable principled hyperparameter search, early stopping decisions, and reproducible handoff to deployment.
+
 
 ### Question 15
 
