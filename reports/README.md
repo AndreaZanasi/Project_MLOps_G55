@@ -335,7 +335,7 @@ We made use of config files in `configs/` folder. First, Hydra automatically sav
 ![wandb_charts](figures/wandb_charts.png) ![wandb_logs](figures/wandb_logs.png)
 We log scalar metrics (train_loss, train_accuracy, val_loss, val_accuracy), optimizer state (learning_rate), and epoch-level summaries for every run. These scalars let us monitor convergence, detect overfitting (val vs train divergence), and compare runs across hyperparameter settings. We also save and version model checkpoints and artifacts (ONNX and PyTorch checkpoints) in W&B so the exact model associated with any metric trace can be retrieved for reproduction and deployment.
 
-In addition to scalars, we log example inputs/outputs (spectrogram images and per-sample predictions) and confusion matrices to inspect class-wise errors and systematic failure modes. Hyperparameter sweep metadata (learning rate, batch size, augmentation flags) is recorded to correlate configuration with performance and to automate best-run selection. The logs screenshot shows epoch-level textual logs and checkpoint saves (validation accuracy appended to filenames), while the charts screenshot illustrates typical loss decrease and accuracy increase over 30 epochs.
+Hyperparameter sweep metadata (learning rate, batch size, augmentation flags) is recorded to correlate configuration with performance and to automate best-run selection. The logs screenshot shows epoch-level textual logs and checkpoint saves (validation accuracy appended to filenames), while the charts screenshot illustrates typical loss decrease and accuracy increase over 30 epochs.
 
 Tracking these metrics is important because:
 - train/val loss and accuracy inform model fit and generalization.
@@ -500,7 +500,7 @@ or from Python: requests.post(URL, json={"audio_specs": array}).
 >
 > Answer:
 
-Unit testing is done with pytest (tests/test_api.py). The test suite loads real spectrogram samples from data/processed/test/test.pt via a module-scoped fixture, samples N_SAMPLES entries, and parameterizes requests so each sample is POSTed to the deployed /predict endpoint. Assertions check HTTP 200, presence of a "prediction" field and that the value is not an error. This verifies the end-to-end behavior (input serialization, model loading in the Bento/ONNX service, and response schema) against our Cloud Run endpoint. For load testing we would use Locust and collect metrics via GCP Cloud Monitoring.
+Unit testing is done with pytest (tests/test_api.py). The test uses dummy input of the correct shape,it makes N_SAMPLES samples, and parameterizes requests so each sample is POSTed to the deployed /predict endpoint. Assertions check HTTP 200, presence of a "prediction" field and that the value is not an error. This verifies the end-to-end behavior (input serialization, model loading in the Bento/ONNX service, and response schema) against our Cloud Run endpoint. For load testing we would use Locust and collect metrics via GCP Cloud Monitoring.
 
 ### Question 26
 
