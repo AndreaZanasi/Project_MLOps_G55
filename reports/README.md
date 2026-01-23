@@ -591,4 +591,8 @@ Integrating CI, testing, and observability (W&B, Cloud Monitoring) introduced fr
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+Student s252979 — set up the repository environment using Cookiecutter and uv; implemented the training, evaluation, model, and data classes; wrote unit tests; built the Bento/ONNX inference service and export scripts; authored the multi‑GPU distributed training script; and configured training and model settings with Hydra. Set up Weights & Biases for logging and artifact storage and implemented local logging using the Python logger.
+
+Student s253128 — implemented the data module, Lightning model, and training scripts for the Lightning framework; wrote unit tests; authored documentation describing project modules; and created a script to generate requirements.txt from pyproject.toml.
+
+Use of AI tools: GitHub Copilot for code suggestions and for debugging assistance.
