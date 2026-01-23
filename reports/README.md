@@ -183,7 +183,7 @@ We managed dependencies using `uv` and a `pyproject.toml` file, which serves as 
 >
 > Answer:
 
---- question 5 fill here ---
+From the cookiecutter template we have filled out the `src/`, `configs/`, `data/`, and `tests/` folders. We have removed the notebooks folder because we did not use any notebooks in our project. The `src/` folder contains `data.py` for data loading and preprocessing, `model.py` for the ResNet34 model architecture, and `train_lightning.py` for the training pipeline using PyTorch Lightning. Additionally, we added a `distributed_training.py` module to implement distributed training using PyTorch's DDP. The `configs/` folder contains Hydra configuration files (`hydra_cfg.yaml`, `model_cfg.yaml`, `train_cfg.yaml`) for managing hyperparameters and model settings. We also created `dockerfiles/` to containerize our training, evaluation, and deployment environments. The `.github/workflows/` directory contains our CI/CD pipelines. Overall, we kept the project structure close to the template.
 
 ### Question 6
 
@@ -281,7 +281,7 @@ Yes, we utilized DVC to manage our project's data. We configured a Google Cloud 
 >
 > Answer:
 
---- question 11 fill here ---
+We have organized our continuous integration into multiple separate files. The `tests.yaml` workflow runs unit testing with pytest on every push to main/dev branches and pull requests. We test across multiple operating systems (ubuntu-latest and windows-latest) to ensure compatibility. The workflow uses caching via the `astral-sh/setup-uv` action with `enable-cache: true` for faster dependency installation, significantly reducing CI runtime. The `codecheck.yaml` workflow handles linting and formatting checks using Ruff, running `ruff check . --fix` and `ruff format . --check` to enforce code quality standards on every commit. The `build-image.yaml` file automatically builds and pushes Docker images to Google Artifact Registry when changes to dockerfiles, source code, or dependencies are detected in the main branch. The `cml_data.yaml` file triggers when any of the DVC files change, automatically pulling data from GCP, preprocessing it, generating dataset statistics, and posting visualization reports as PR comments using CML. The `stage_model.yaml` workflow is triggered via repository dispatch events when models are staged in Weights & Biases and it automatically runs performance tests on the staged model and adds production aliases if tests pass. All workflows use the `uv` package manager for dependency management. Pre-commit hooks are configured in `.pre-commit-config.yaml` to run Ruff checks and automatically compile requirements.txt before commits. An example of a triggered workflow can be seen here: https://github.com/AndreaZanasi/Project_MLOps_G55/actions/runs/21258714244/job/61180417185
 
 ## Running code and tracking experiments
 
@@ -300,7 +300,7 @@ Yes, we utilized DVC to manage our project's data. We configured a Google Cloud 
 >
 > Answer:
 
---- question 12 fill here ---
+We used Hydra for experiment configuration. Configuration files in `configs/` folder define all hyperparameters and model settings in YAML format. To run an experiment: `uv run src/proj/train_lightning.py` loads default configs. To override: `uv run src/proj/train_lightning.py hyperparameters.learning_rate=1e-4 hyperparameters.batch_size=32`. Hydra automatically creates configurations and timestamped output directories with experiment runs, ensuring reproducibility and organization of multiple experimental runs.
 
 ### Question 13
 
@@ -315,7 +315,7 @@ Yes, we utilized DVC to manage our project's data. We configured a Google Cloud 
 >
 > Answer:
 
---- question 13 fill here ---
+We made use of config files in `configs/` folder. First, Hydra automatically saves all configuration files to timestamped output directories (`outputs/{date}/{time}/`), preserving exact experimental settings. Then we use Weights & Biases for logging of all metrics, hyperparameters, model artifacts, and training statistics. Every experiment run is logged with full config information stored in W&B. Additionally, we version our dependencies with `uv.lock` file to make sure that exact package versions are reproducible. Finally, we also save model checkpoints with validation metrics in filenames, allowing to easily identificate the best performing models. To reproduce an experiment, one would have to retrieve the config files from W&B or the output directory, ensure identical environment by running `uv sync --locked`, and re-run with the same Hydra overrides. DVC is also configured to track data pipeline reproducibility.
 
 ### Question 14
 
@@ -332,7 +332,7 @@ Yes, we utilized DVC to manage our project's data. We configured a Google Cloud 
 >
 > Answer:
 
---- question 14 fill here ---
+![wandb_charts](figures/wandb_charts.png). ![wandb_logs](figures/wandb_logs.png). W&B's centralized logging system enables easy comparison across multiple experimental runs, facilitating hyperparameter optimization and model selection. The logged artifacts and configurations are essential for reproducibility and model deployment, as we can retrieve the exact model version and settings that produced the best results.
 
 ### Question 15
 
@@ -538,7 +538,7 @@ In total, we used slightly above 7 DKK. The service that cost the most was defin
 >
 > Answer:
 
---- question 28 fill here ---
+No.
 
 ### Question 29
 
@@ -555,7 +555,7 @@ In total, we used slightly above 7 DKK. The service that cost the most was defin
 >
 > Answer:
 
---- question 29 fill here ---
+The starting point of our architecture is our local setup, where we integrated Hydra for configuration management, PyTorch Lightning for streamlined training, and Weights & Biases for experiment tracking. The main framework we used are PyTorch for deep learning, librosa for audio signal processing, and Hugging Face Datasets for efficient data loading. Code quality is enforced through Ruff linting and formatting with pre-commit hooks, and dependencies are managed with `uv`. Unit testing is performed with pytest. When we commit code and push to GitHub's main or dev branches, it auto triggers multiple CI/CD workflows: tests.yaml runs pytest tests across multiple OS (Windows, Ubuntu) with dependency caching, while codecheck.yaml performs linting checks using Ruff. The cml_data.yaml workflow pulls data from GCP and generates dataset statistics such as audio class distributions and spectrograms. Only when changes are pushed to the main branch, build-image.yaml is triggered, which automatically builds Docker images and pushes them to Google Cloud Artifact Registry. From the artifact registry, the images are pulled by Google Cloud Build and Vertex AI for distributed training on the cloud. During training, metrics and model artifacts are logged to Weights & Biases for monitoring and comparison. Additionally, when we add the alias "staging" to a model in W&B, the stage_model.yaml workflow is triggered via repository dispatch, which automatically runs performance tests on the staged model and adds production aliases if tests pass. After successful training and validation, the best model is converted to ONNX format and deployed to Google Cloud Run as a containerized BentoML service. The API endpoints accept audio spectrograms and return species predictions. Input and output data from the deployed API is also collected for monitoring. We use DVC to manage our data versioning, storing raw and processed datasets in Google Cloud Storage, whereas checkpoints and trained models are versioned in the artifact registry. This pipeline ensures reproducibility, automated testing, continuous deployment, and scalable training across the entire MLOps workflow.
 
 ### Question 30
 
