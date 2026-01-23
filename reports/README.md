@@ -198,7 +198,8 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 6 fill here ---
+We used ruff (configured in .pre-commit-config.yaml and pyproject.toml) together with pep8 conventions for linting and automatic formatting (ruff --fix and ruff-format). Pre-commit hooks enforce these rules before commits. Dependency and environment reproducibility is handled via pyproject.toml and uv. For typing we applied Python type hints across modules to document interfaces and catch errors.
+These practices matter in larger projects because they increase maintainability, reduce subtle bugs, and speed onboarding. Consistent formatting and linting make code review efficient; typing clarifies intent and enables safer refactoring; and good docs preserve institutional knowledge so teams can scale without losing productivity.
 
 ## Version control
 
@@ -217,7 +218,7 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 7 fill here ---
+We implemented tests across 5 modules/files: tests/test_data.py, tests/test_train.py, tests/test_evaluate.py, test_api.py and tests/performancetests/test_model.py. They verify data downloading and preprocessing, dataset statistics/integrity, training pipeline and checkpointing, evaluation metrics and model outputs, API endpoint behavior and responses, and a performance test checking model inference behavior and speed.
 
 ### Question 8
 
@@ -232,7 +233,8 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 8 fill here ---
+The total code coverage is 49% (coverage report: src/proj/ — total 277 lines, 141 missed). Several core modules (data.py, model.py, data_module.py, lightning_model.py) have low coverage, while evaluate.py and train_lightning.py are better but still incomplete.
+Even if coverage were close to 100%, I would not assume the code is error free. Line coverage only shows which lines were executed by tests, not that all edge cases, integration paths, performance characteristics, or environment-specific failures are exercised. Tests can miss wrong assumptions, data distribution shifts, race conditions, numerical instability, and external-system failures. To improve trustworthiness we should add focused unit tests for edge cases and property-based tests, so coverage reflects meaningful behavioral guarantees rather than just executed lines.
 
 ### Question 9
 
@@ -247,7 +249,7 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 9 fill here ---
+We used feature branches and pull requests for all non-trivial changes. Each new task was developed on a dedicated branch named by feature or issue (e.g., feature/data, fix/api-test-bug). Changes were merged first into a protected dev branch via pull requests after at least one review and passing CI (unit tests, linting, coverage checks). The dev branch accumulated integration-ready work and was periodically merged into main using reviewed, squash merges to keep history tidy. Pre-commit hooks and CI runs enforced style, tests, and security checks on every PR. This workflow improved collaboration, reduced risky direct pushes to main, and ensured automated validation before merging.
 
 ### Question 10
 
@@ -360,7 +362,7 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 16 fill here ---
+We debugged primarily with targeted unit tests, extensive logging, and interactive runs. Failing tests were reproduced locally using `uv run pytest tests/` and traced with module-level logs to locate issues. For quick checks we ran small scripts with `uv run` to exercise specific functions, used assertions and short ad-hoc prints to validate assumptions, and inspected artifacts in W&B to spot anomalies. We did not run a formal profiler since training and data handling were already fast. We plan to add cProfile/pyinstrument-based profiling if performance bottlenecks appear.
 
 ## Working in the cloud
 
@@ -451,7 +453,7 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 23 fill here ---
+We implemented the inference API using BentoML together with an exported ONNX model. The model is exported to ONNX (src/proj/api/export_onnx.py) and stored as a Bento artifact (src/proj/api/bento/artifacts). The Bento service (src/proj/api/bento/service.py) wraps the ONNXRuntime session, implements the predict endpoint, and loads the model at startup to avoid per-request overhead. BentoML was used to containerize and deploy the service (bentoml containerize / bentoml serve), providing a portable image suitable for Cloud Run. This setup gives fast, framework-agnostic inference and simplifies CI/CD and testing (tests/test_api.py covers endpoint behavior).
 
 ### Question 24
 
@@ -467,7 +469,9 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 24 fill here ---
+We deployed the inference API to GCP Cloud. First we implemented the BentoML service (src/proj/api/bento/service.py) and exported the model (ONNX) as a Bento artifact (src/proj/api/export_onnx.py). We containerized the service using the bentofile.yaml (bentoml build / bentoml containerize) to generate a Docker image, pushed the image to Artifact Registry, and created a Cloud Run service to serve the container. The service loads the ONNX model at startup to avoid per-request loading and exposes /predict and /health endpoints. Example invocation:
+curl -X POST -H "Content-Type: application/json" -d '{"audio_specs": <array>}' https://audio-service-685944380771.europe-west6.run.app/predict
+or from Python: requests.post(URL, json={"audio_specs": array}).
 
 ### Question 25
 
@@ -482,7 +486,7 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 25 fill here ---
+Unit testing is done with pytest (tests/test_api.py). The test suite loads real spectrogram samples from data/processed/test/test.pt via a module-scoped fixture, samples N_SAMPLES entries, and parameterizes requests so each sample is POSTed to the deployed /predict endpoint. Assertions check HTTP 200, presence of a "prediction" field and that the value is not an error. This verifies the end-to-end behavior (input serialization, model loading in the Bento/ONNX service, and response schema) against our Cloud Run endpoint. For load testing we would use Locust and collect metrics via GCP Cloud Monitoring.
 
 ### Question 26
 
@@ -563,7 +567,13 @@ We used `uv` package manager to handle depedencies. Each team member had to sync
 >
 > Answer:
 
---- question 30 fill here ---
+The main struggle was environment and dependency management. Multiple ML libraries (PyTorch, torchaudio, ONNX, ONNX Runtime, BentoML, Lightning) and tooling (uv, ruff, pre-commit, pytest, wandb, DVC) required carefully pinned versions to avoid ABI and API conflicts. Resolving these took significant time: reproducing failing installations and ensuring the uv index configuration worked reliably. We mitigated this by pinning exact versions in pyproject.toml, using uv lock/sync, and adding CI jobs to catch installation regressions early.
+
+Deployment and model packaging were another major area of effort. Exporting a stable ONNX artifact, integrating it with BentoML, containerizing via bentofile.yaml, and making the image Cloud Run–ready required iterative debugging (model I/O, input validation, startup loading). We solved this by adding small local integration tests, keeping the model-loading logic modular, and using container builds in CI to validate images before pushing to Artifact Registry.
+
+Data management and reproducibility also consumed time. Ensuring that preprocessing, dataset splits, and spectrogram serialization were deterministic required config handling and some tests to know which were the best conditions to work with our data. We improved this testing on the data several times untill the data was setup correctly and proper to work with, and adding unit tests that load those artifacts to validate end-to-end behavior.
+
+Integrating CI, testing, and observability (W&B, Cloud Monitoring) introduced friction but paid off: pre-commit hooks and CI pipelines caught regressions early. Overall, most time was spent on infrastructure (env, deployment, data reproducibility) rather than model research. The remedies were strict dependency pinning, modular code/design, automated CI checks, and reproducible build/deploy procedures documented for team onboarding.
 
 ### Question 31
 
